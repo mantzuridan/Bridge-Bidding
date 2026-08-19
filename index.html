@@ -430,7 +430,7 @@ details.legend td{padding:2px 6px; font-variant-numeric:tabular-nums;}
   border-bottom:1px solid var(--border);
 }
 .scoreboard-table tbody tr:last-child td{border-bottom:none;}
-.scoreboard-table tbody tr:first-child .sb-name{font-weight:700; color:var(--accent-strong);}
+.scoreboard-table .sb-name.sb-me{font-weight:700; color:var(--accent-strong);}
 .scoreboard-note{font-size:0.78rem; color:var(--ink-muted);}
 .scoreboard-name-row{
   display:flex;
@@ -552,8 +552,16 @@ details.legend td{padding:2px 6px; font-variant-numeric:tabular-nums;}
   gap:10px;
 }
 .size-btn{
-  flex:1;
+  flex:1 1 28%;
   align-self:stretch;
+  background:var(--surface-2);
+  color:var(--ink);
+  border:1px solid var(--border);
+}
+.size-btn.active{
+  background:var(--accent);
+  color:var(--accent-ink);
+  border-color:var(--accent);
 }
 .type-btn{
   flex:1 1 40%;
@@ -684,9 +692,9 @@ details.legend td{padding:2px 6px; font-variant-numeric:tabular-nums;}
         <div class="points-breakdown">רגילות: <b id="pts-regular">0</b> · ארציות: <b id="pts-national">0</b> · בין-לאומיות: <b id="pts-intl">0</b></div>
         <div>סבב 10 הכרזות: 100% ← 12 נק' · 80%+ ← 8 נק'</div>
         <div>סבב 25 הכרזות: 100% ← 30 נק' + נקודה ארצית · 80%+ ← 20 נק'</div>
-        <div>הכרזות חופשיות: נקודה על כל הכרזה נכונה, ועוד בונוס רגיל מצטבר כל 15 הכרזות (1, אז 2, אז 3...)</div>
-        <div>הכרזות חופשיות: בונוס ארצי מצטבר באותה שיטה, כל 50 הכרזות נכונות</div>
-        <div>הכרזות חופשיות: נקודה בין-לאומית אחת (לא מצטברת) על כל 1,000 הכרזות רצופות</div>
+        <div>משחק חופשי: נקודה על כל הכרזה נכונה, ועוד בונוס רגיל מצטבר כל 15 הכרזות (1, אז 2, אז 3...)</div>
+        <div>משחק חופשי: בונוס ארצי מצטבר באותה שיטה, כל 50 הכרזות נכונות</div>
+        <div>משחק חופשי: נקודה בין-לאומית אחת (לא מצטברת) על כל 1,000 הכרזות רצופות</div>
       </div>
     </details>
     <details class="legend">
@@ -722,10 +730,11 @@ details.legend td{padding:2px 6px; font-variant-numeric:tabular-nums;}
     <div>
       <div class="module-section-title">בחר אורך סבב</div>
       <div class="size-choice">
-        <button class="btn size-btn" data-size="10">10 הכרזות</button>
-        <button class="btn size-btn" data-size="25">25 הכרזות</button>
+        <button class="btn size-btn active" id="size-10-btn" data-size="10">10 הכרזות</button>
+        <button class="btn size-btn" id="size-25-btn" data-size="25">25 הכרזות</button>
+        <button class="btn size-btn" id="size-free-btn" data-size="free">משחק חופשי</button>
       </div>
-      <button class="btn wide" id="free-mode-btn" style="margin-top:10px; background:var(--surface-2); color:var(--ink); border:1px solid var(--border);">הכרזות חופשיות - עד הטעות הראשונה</button>
+      <button class="btn wide" id="start-game-btn" style="margin-top:10px;">התחל משחק</button>
     </div>
     <button class="settings-link" id="settings-link">⚙️ הגדרות עיצוב</button>
   </div>
@@ -1133,12 +1142,14 @@ let SCOREBOARD = [];
 function renderScoreboardTable(){
   const tbody = document.getElementById('scoreboard-body');
   if(!tbody) return;
+  const nameInput = document.getElementById('scoreboard-name-input');
+  const myName = nameInput ? nameInput.value.trim() : '';
   const sorted = SCOREBOARD.slice().sort((a,b)=> b.points - a.points);
   tbody.innerHTML = '';
   sorted.forEach(entry=>{
     const row = document.createElement('tr');
     const nameCell = document.createElement('td');
-    nameCell.className = 'sb-name';
+    nameCell.className = 'sb-name' + (myName && entry.name===myName ? ' sb-me' : '');
     nameCell.textContent = entry.name;
     const ptsCell = document.createElement('td');
     ptsCell.className = 'sb-points';
@@ -1210,6 +1221,7 @@ if(sb){
 let round = null;
 let appState = 'home';
 let practiceType = 'opening';
+let selectedSize = 10;
 
 let handViewMode = 'fan';
 try{
@@ -1235,6 +1247,13 @@ function setPracticeType(type){
   document.getElementById('type-rebid-btn').classList.toggle('active', type==='rebid');
   document.getElementById('type-mixed-btn').classList.toggle('active', type==='mixed');
   renderRulesLegend();
+}
+
+function setPracticeSize(size){
+  selectedSize = size;
+  document.getElementById('size-10-btn').classList.toggle('active', size===10);
+  document.getElementById('size-25-btn').classList.toggle('active', size===25);
+  document.getElementById('size-free-btn').classList.toggle('active', size==='free');
 }
 
 function startRound(size){
@@ -1807,9 +1826,9 @@ function resetAdminOverrides(){
 }
 
 document.querySelectorAll('.size-btn').forEach(btn=>{
-  btn.addEventListener('click', ()=> startRound(parseInt(btn.dataset.size,10)));
+  btn.addEventListener('click', ()=> setPracticeSize(btn.dataset.size==='free' ? 'free' : parseInt(btn.dataset.size,10)));
 });
-document.getElementById('free-mode-btn').addEventListener('click', ()=> startRound('free'));
+document.getElementById('start-game-btn').addEventListener('click', ()=> startRound(selectedSize));
 document.getElementById('type-opening-btn').addEventListener('click', ()=> setPracticeType('opening'));
 document.getElementById('type-responder-btn').addEventListener('click', ()=> setPracticeType('responder'));
 document.getElementById('type-rebid-btn').addEventListener('click', ()=> setPracticeType('rebid'));
