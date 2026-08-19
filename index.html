@@ -219,6 +219,18 @@ header.top{
   gap:4px;
   min-height:22px;
 }
+.auction-row{
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:22px;
+}
+.auction-seat{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
 .partner-indicator{
   text-align:center;
   font-size:0.85rem;
@@ -1497,7 +1509,24 @@ function renderHand(){
 
 function renderPartnerArea(){
   const el = document.getElementById('partner-area');
-  const partnerBid = round && round.currentSubType==='rebid' ? round.respBid : (round ? round.openBid : null);
+  if(round && round.currentSubType==='rebid' && round.openBid && round.respBid){
+    const meCls = suitColorClass(round.openBid);
+    const partnerCls = suitColorClass(round.respBid);
+    el.innerHTML = `
+      <div class="auction-row">
+        <div class="auction-seat">
+          <span class="partner-bid-label">את/ה הכרזת</span>
+          <span class="partner-bid-tile ${meCls}">${formatBid(round.openBid)}</span>
+        </div>
+        <div class="auction-seat">
+          <span class="partner-bid-label">השותף הכריז</span>
+          <span class="partner-bid-tile ${partnerCls}">${formatBid(round.respBid)}</span>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  const partnerBid = round ? round.openBid : null;
   if(partnerBid){
     const cls = suitColorClass(partnerBid);
     el.innerHTML = `
