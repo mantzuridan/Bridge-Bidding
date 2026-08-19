@@ -536,6 +536,7 @@ details.legend td{padding:2px 6px; font-variant-numeric:tabular-nums;}
 
 .size-choice{
   display:flex;
+  flex-wrap:wrap;
   gap:10px;
 }
 .size-btn{
@@ -543,7 +544,7 @@ details.legend td{padding:2px 6px; font-variant-numeric:tabular-nums;}
   align-self:stretch;
 }
 .type-btn{
-  flex:1;
+  flex:1 1 40%;
   align-self:stretch;
   background:var(--surface-2);
   color:var(--ink);
@@ -702,6 +703,7 @@ details.legend td{padding:2px 6px; font-variant-numeric:tabular-nums;}
       <div class="size-choice">
         <button class="btn type-btn active" id="type-opening-btn" data-type="opening">פתיחות</button>
         <button class="btn type-btn" id="type-responder-btn" data-type="responder">תשובות למכריז</button>
+        <button class="btn type-btn" id="type-rebid-btn" data-type="rebid">הכרזה חוזרת</button>
         <button class="btn type-btn" id="type-mixed-btn" data-type="mixed">מעורב</button>
       </div>
     </div>
@@ -713,14 +715,6 @@ details.legend td{padding:2px 6px; font-variant-numeric:tabular-nums;}
       </div>
       <button class="btn wide" id="free-mode-btn" style="margin-top:10px; background:var(--surface-2); color:var(--ink); border:1px solid var(--border);">הכרזות חופשיות - עד הטעות הראשונה</button>
     </div>
-    <details class="legend">
-      <summary>מודולים נוספים</summary>
-      <div class="legend-body">
-        <div class="module-list">
-          <div class="module-item locked"><span class="module-name">הכרזה חוזרת</span><span class="module-badge">בקרוב</span></div>
-        </div>
-      </div>
-    </details>
     <button class="settings-link" id="settings-link">⚙️ הגדרות עיצוב</button>
   </div>
 
@@ -1050,6 +1044,64 @@ function responderBid(hand, openBid){
   return respondToSuit(lengths, pts, openBid.slice(1));
 }
 
+/* ---------- opener's rebid engine (verified against Toolbox source PDF; only covers a 1-level
+   suit opening followed by a simple 1-level answer from responder - not 2♣ openings, not
+   raises/2-level answers, and reverse rebids (second suit higher-ranked, 17+ pts) are
+   explicitly deferred by the source itself to a separate lesson, so they are excluded here) ---------- */
+
+const OPENER_REBID_RESPONSES = {
+  '1♣': ['1♦','1♥','1♠','1NT'],
+  '1♦': ['1♥','1♠','1NT'],
+  '1♥': ['1♠','1NT'],
+  '1♠': ['1NT']
+};
+
+function openerRebid(hand, openBid, respBid){
+  const lengths = suitLengths(hand);
+  const pts = hcp(hand);
+  const balanced = isBalanced(lengths);
+  const openedSuit = openBid.slice(1);
+
+  if(balanced){
+    if(respBid==='1NT') return null;
+    if(pts<=14) return {bid:'1NT', explain:`${pts} נק' - יד מאוזנת חלשה (12-14), חוזרים ב-NT הזול ביותר`};
+    if(pts>=18) return {bid:'2NT', explain:`${pts} נק' - יד מאוזנת חזקה (18-19), קפיצה ל-NT`};
+    return null;
+  }
+
+  const candidates = SUIT_DISPLAY_ORDER.filter(s => s!==openedSuit && lengths[s]>=4);
+
+  if(candidates.length===0){
+    if(pts<=14) return {bid:'2'+openedSuit, explain:`${pts} נק' - יד חד-סדרתית חלשה, חוזרים על הסדרה בגובה הנמוך ביותר`};
+    if(pts<=17) return {bid:'3'+openedSuit, explain:`${pts} נק' - יד חד-סדרתית בינונית, חוזרים על הסדרה בקפיצה`};
+    const isMajor = (openedSuit==='♠'||openedSuit==='♥');
+    if(isMajor) return {bid:'4'+openedSuit, explain:`${pts} נק' - יד חד-סדרתית חזקה (18-19) בסדרת מייג'ור, קפיצה כפולה למשחק מלא`};
+    return {bid:'3NT', explain:`${pts} נק' - יד חד-סדרתית חזקה (18-19) בסדרת מיינור, אין קפיצה מעשית - 3NT בלית ברירה`};
+  }
+
+  if(candidates.length>1) return null;
+  if(pts<12 || pts>17) return null;
+
+  const secondSuit = candidates[0];
+  if(STRAIN_ORDER.indexOf(secondSuit) > STRAIN_ORDER.indexOf(openedSuit)) return null;
+
+  return {bid:'2'+secondSuit, explain:`${pts} נק' - יד דו-סדרתית (${lengths[openedSuit]} ב${suitName(openedSuit)}, ${lengths[secondSuit]} ב${suitName(secondSuit)}), מציגים את הסדרה השנייה בגובה 2`};
+}
+
+function dealRebidScenario(){
+  for(let i=0;i<500;i++){
+    const hand = dealHand();
+    const open = openingBid(hand);
+    if(!/^1[♣♦♥♠]$/.test(open.bid)) continue;
+    const pool = OPENER_REBID_RESPONSES[open.bid];
+    const respBid = pool[Math.floor(Math.random()*pool.length)];
+    const rebid = openerRebid(hand, open.bid, respBid);
+    if(!rebid) continue;
+    return {hand, openBid:open.bid, respBid, rebid};
+  }
+  return null;
+}
+
 /* ---------- UI state & rendering ---------- */
 
 let stats = {correct:0, total:0, points:0, nationalPoints:0, intlPoints:0};
@@ -1168,6 +1220,7 @@ function setPracticeType(type){
   practiceType = type;
   document.getElementById('type-opening-btn').classList.toggle('active', type==='opening');
   document.getElementById('type-responder-btn').classList.toggle('active', type==='responder');
+  document.getElementById('type-rebid-btn').classList.toggle('active', type==='rebid');
   document.getElementById('type-mixed-btn').classList.toggle('active', type==='mixed');
   renderRulesLegend();
 }
@@ -1209,6 +1262,13 @@ function dealNextHand(){
     round.openBid = RESPONDER_OPEN_POOL[Math.floor(Math.random()*RESPONDER_OPEN_POOL.length)];
     decision = responderBid(round.hand, round.openBid);
     choices = buildResponderChoices(decision.bid, round.openBid);
+  } else if(subType==='rebid'){
+    const scenario = dealRebidScenario() || dealRebidScenario() || dealRebidScenario();
+    round.hand = scenario.hand;
+    round.openBid = scenario.openBid;
+    round.respBid = scenario.respBid;
+    decision = scenario.rebid;
+    choices = buildResponderChoices(decision.bid, scenario.respBid);
   } else {
     round.hand = dealHandBiased();
     round.openBid = null;
@@ -1345,12 +1405,24 @@ const RESPONDER_RULES_HTML = `
   <div style="font-size:0.75rem; opacity:0.85;">* תשובות לפתיחת 2♣ החזקה עדיין לא כלולות בתרגול הזה</div>
 `;
 
+const REBID_RULES_HTML = `
+  ${POINTS_TABLE_HTML}
+  <div>אחרי פתיחה בגובה 1 ותשובת השותף בגובה 1 (כולל 1NT), ההכרזה החוזרת שלך מתארת את היד במדויק:</div>
+  <div><b>יד מאוזנת:</b> 12-14 נק' ← NT הזול ביותר (1NT) · 18-19 נק' ← קפיצה ל-NT (2NT)</div>
+  <div><b>יד חד-סדרתית:</b> 12-14 ← חוזרים על הסדרה בזול · 15-17 ← חוזרים על הסדרה בקפיצה · 18-19 (מייג'ור) ← קפיצה כפולה למשחק מלא · 18-19 (מיינור) ← 3NT בלית ברירה</div>
+  <div><b>יד דו-סדרתית:</b> סדרה שנייה (4+ קלפים) הנמוכה מהראשונה ← מכריזים אותה בגובה 2 (12-17 נק')</div>
+  <div style="font-size:0.75rem; opacity:0.85;">* מקרה שבו הסדרה השנייה גבוהה מהראשונה (רברס, 17+ נק') עדיין לא כלול בתרגול הזה</div>
+`;
+
 function renderRulesLegend(){
   const summary = document.getElementById('rules-summary');
   const body = document.getElementById('rules-body');
   if(practiceType==='responder'){
     summary.textContent = 'תזכורת - כללי התשובה';
     body.innerHTML = RESPONDER_RULES_HTML;
+  } else if(practiceType==='rebid'){
+    summary.textContent = 'תזכורת - כללי ההכרזה החוזרת';
+    body.innerHTML = REBID_RULES_HTML;
   } else if(practiceType==='mixed'){
     summary.textContent = 'תזכורת - כללי הפתיחה והתשובה';
     body.innerHTML = `
@@ -1425,11 +1497,12 @@ function renderHand(){
 
 function renderPartnerArea(){
   const el = document.getElementById('partner-area');
-  if(round && round.openBid){
-    const cls = suitColorClass(round.openBid);
+  const partnerBid = round && round.currentSubType==='rebid' ? round.respBid : (round ? round.openBid : null);
+  if(partnerBid){
+    const cls = suitColorClass(partnerBid);
     el.innerHTML = `
       <span class="partner-bid-label">השותף הכריז</span>
-      <span class="partner-bid-tile ${cls}">${formatBid(round.openBid)}</span>
+      <span class="partner-bid-tile ${cls}">${formatBid(partnerBid)}</span>
     `;
   } else {
     el.innerHTML = `<span class="partner-indicator">🂠 🂠 🂠 🂠 · השותף</span>`;
@@ -1506,10 +1579,15 @@ function renderActionPanel(){
   const p = round.pending;
 
   if(p.phase==='question'){
-    const contextLine = round.currentSubType==='responder'
-      ? `<div class="context-line">השותף פתח <b>${formatBid(round.openBid)}</b></div>`
-      : '';
-    const promptText = round.currentSubType==='responder' ? 'מה התשובה הנכונה?' : 'מה ההכרזה הנכונה?';
+    let contextLine = '';
+    if(round.currentSubType==='responder'){
+      contextLine = `<div class="context-line">השותף פתח <b>${formatBid(round.openBid)}</b></div>`;
+    } else if(round.currentSubType==='rebid'){
+      contextLine = `<div class="context-line">פתחת <b>${formatBid(round.openBid)}</b> · השותף ענה <b>${formatBid(round.respBid)}</b></div>`;
+    }
+    const promptText = round.currentSubType==='responder' ? 'מה התשובה הנכונה?'
+      : round.currentSubType==='rebid' ? 'מה ההכרזה החוזרת שלך?'
+      : 'מה ההכרזה הנכונה?';
     panel.innerHTML = `
       <div class="panel">
         ${contextLine}
@@ -1705,6 +1783,7 @@ document.querySelectorAll('.size-btn').forEach(btn=>{
 document.getElementById('free-mode-btn').addEventListener('click', ()=> startRound('free'));
 document.getElementById('type-opening-btn').addEventListener('click', ()=> setPracticeType('opening'));
 document.getElementById('type-responder-btn').addEventListener('click', ()=> setPracticeType('responder'));
+document.getElementById('type-rebid-btn').addEventListener('click', ()=> setPracticeType('rebid'));
 document.getElementById('type-mixed-btn').addEventListener('click', ()=> setPracticeType('mixed'));
 document.getElementById('app-title').addEventListener('click', goHome);
 document.getElementById('home-btn-header').addEventListener('click', goHome);
