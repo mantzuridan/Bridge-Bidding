@@ -1,0 +1,1726 @@
+<title>שולחן הכרזה</title>
+<style>
+:root{
+  --bg:#eef4ee;
+  --surface:#ffffff;
+  --surface-2:#e2ece1;
+  --ink:#17271b;
+  --ink-muted:#52685a;
+  --accent:#1f7a52;
+  --accent-strong:#145c3c;
+  --accent-ink:#ffffff;
+  --felt:#1f4d3d;
+  --felt-ink:#f5f1e6;
+  --felt-line:rgba(245,241,230,0.16);
+  --success:#2f9e5f;
+  --success-bg:#e2f3e6;
+  --success-ink:#0c3d22;
+  --danger:#c33f36;
+  --danger-bg:#fbe8e6;
+  --danger-ink:#4a1210;
+  --border:#cfe0d1;
+  --suit-red:#b5342b;
+  --suit-black:#17271b;
+  --shadow:0 10px 28px rgba(20,50,35,0.16);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1a13;
+    --surface:#17251b;
+    --surface-2:#1d2f22;
+    --ink:#e8f0e6;
+    --ink-muted:#9db29e;
+    --accent:#3fae7c;
+    --accent-strong:#5cc794;
+    --accent-ink:#06210f;
+    --felt:#153228;
+    --felt-ink:#f3efe2;
+    --felt-line:rgba(243,239,226,0.14);
+    --success:#48c085;
+    --success-bg:#123527;
+    --success-ink:#c9f2dc;
+    --danger:#e2726c;
+    --danger-bg:#3a1512;
+    --danger-ink:#f9dcd9;
+    --border:#2a3d30;
+    --suit-red:#e2726c;
+    --suit-black:#e8f0e6;
+    --shadow:0 10px 30px rgba(0,0,0,0.5);
+  }
+}
+:root[data-theme="dark"]{
+    --bg:#0f1a13;
+    --surface:#17251b;
+    --surface-2:#1d2f22;
+    --ink:#e8f0e6;
+    --ink-muted:#9db29e;
+    --accent:#3fae7c;
+    --accent-strong:#5cc794;
+    --accent-ink:#06210f;
+    --felt:#153228;
+    --felt-ink:#f3efe2;
+    --felt-line:rgba(243,239,226,0.14);
+    --success:#48c085;
+    --success-bg:#123527;
+    --success-ink:#c9f2dc;
+    --danger:#e2726c;
+    --danger-bg:#3a1512;
+    --danger-ink:#f9dcd9;
+    --border:#2a3d30;
+    --suit-red:#e2726c;
+    --suit-black:#e8f0e6;
+    --shadow:0 10px 30px rgba(0,0,0,0.5);
+}
+
+*{box-sizing:border-box;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  direction:rtl;
+  font-family:"Segoe UI","Arial Hebrew","Noto Sans Hebrew",system-ui,sans-serif;
+  margin:0;
+}
+.app{
+  max-width:480px;
+  margin:0 auto;
+  padding:20px 16px 60px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+header.top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.title-block h1{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:1.5rem;
+  margin:0;
+  letter-spacing:0.02em;
+  text-wrap:balance;
+}
+.title-block p{
+  margin:2px 0 0;
+  font-size:0.8rem;
+  color:var(--ink-muted);
+}
+.score-chip{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:8px 14px;
+  font-size:0.82rem;
+  font-variant-numeric:tabular-nums;
+  box-shadow:var(--shadow);
+  white-space:nowrap;
+}
+.score-chip b{color:var(--accent-strong);}
+
+.progress-block{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  align-items:center;
+}
+.progress-label{
+  font-size:0.8rem;
+  color:var(--ink-muted);
+}
+.dots{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:6px;
+}
+.dot{
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  border:2px solid var(--border);
+  background:var(--surface);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:0.65rem;
+  color:transparent;
+}
+.dot.current{border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);}
+.dot.ok{background:var(--success); border-color:var(--success); color:var(--success-bg);}
+.dot.bad{background:var(--danger); border-color:var(--danger); color:var(--danger-bg);}
+
+.hand-tray{
+  background:var(--felt);
+  color:var(--felt-ink);
+  border-radius:18px;
+  padding:16px 14px;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.hand-tray .tray-title{
+  font-size:0.72rem;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  opacity:0.75;
+  margin-bottom:2px;
+}
+.hand-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:5px 0;
+  border-bottom:1px solid var(--felt-line);
+  direction:ltr;
+}
+.hand-row:last-child{border-bottom:none;}
+.hand-row .suit-symbol{
+  font-size:1.25rem;
+  width:1.4em;
+  text-align:center;
+  flex-shrink:0;
+}
+.hand-row.red .suit-symbol{color:#e8837c;}
+.hand-row.black .suit-symbol{color:var(--felt-ink);}
+.hand-row .cards{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:1.05rem;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:0.03em;
+  word-spacing:0.15em;
+}
+.hand-row .cards.empty{opacity:0.5; font-size:0.85rem; font-family:inherit;}
+
+.table-scene{
+  background:linear-gradient(160deg, #7a4f2a, #4d3016);
+  border-radius:22px;
+  padding:8px;
+  box-shadow:var(--shadow);
+}
+.table-felt{
+  background:radial-gradient(ellipse at 50% 25%, var(--felt), color-mix(in srgb, var(--felt) 76%, black));
+  border-radius:16px;
+  padding:12px 8px 18px;
+  position:relative;
+  min-height:170px;
+  overflow:visible;
+}
+.partner-area{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  min-height:22px;
+}
+.partner-indicator{
+  text-align:center;
+  font-size:0.85rem;
+  color:var(--felt-ink);
+  opacity:0.32;
+  letter-spacing:0.06em;
+}
+.partner-bid-label{
+  font-size:0.68rem;
+  color:var(--felt-ink);
+  opacity:0.7;
+  letter-spacing:0.04em;
+}
+.partner-bid-tile{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:56px;
+  padding:4px 12px;
+  border-radius:8px;
+  font-family:Georgia,"Times New Roman",serif;
+  font-weight:700;
+  font-size:1.1rem;
+  background:var(--surface);
+  border:2px solid var(--accent);
+  box-shadow:0 3px 8px rgba(0,0,0,0.35);
+  direction:ltr;
+}
+.partner-bid-tile.red{color:var(--suit-red);}
+.partner-bid-tile.black{color:var(--suit-black);}
+.partner-bid-tile.nt{color:var(--accent-strong);}
+.partner-bid-tile.pass{
+  font-family:inherit;
+  font-style:italic;
+  font-weight:600;
+  color:var(--ink-muted);
+}
+.hand-fan{
+  position:relative;
+  height:94px;
+  margin-top:26px;
+}
+.fan-card{
+  position:absolute;
+  bottom:0;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:6px;
+  box-shadow:0 3px 5px rgba(0,0,0,0.35);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-family:Georgia,"Times New Roman",serif;
+  transform-origin:bottom center;
+  transition:transform 0.15s ease;
+}
+.fan-card .fc-rank{font-weight:700; line-height:1.15;}
+.fan-card .fc-suit{line-height:1.15;}
+.fan-card.red{color:var(--suit-red);}
+.fan-card.black{color:var(--suit-black);}
+@media (prefers-reduced-motion: reduce){
+  .fan-card{transition:none;}
+}
+
+.panel{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.panel .prompt{
+  font-size:0.95rem;
+  font-weight:600;
+}
+.choices{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(76px,1fr));
+  gap:8px;
+  direction:ltr;
+}
+.tile{
+  border:1px solid var(--border);
+  background:var(--surface-2);
+  border-radius:12px;
+  padding:12px 4px;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:1.15rem;
+  font-weight:700;
+  cursor:pointer;
+  transition:transform 0.08s ease, background 0.15s ease;
+  direction:ltr;
+}
+.tile:hover{transform:translateY(-2px);}
+.tile:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+.tile.red{color:var(--suit-red);}
+.tile.black{color:var(--suit-black);}
+.tile.nt{color:var(--accent-strong);}
+.tile.pass{
+  font-family:inherit;
+  font-style:italic;
+  font-weight:600;
+  color:var(--ink-muted);
+}
+@media (prefers-reduced-motion: reduce){
+  .tile{transition:none;}
+}
+
+.feedback{
+  border-radius:12px;
+  padding:12px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.feedback.ok{background:var(--success-bg); color:var(--success-ink);}
+.feedback.bad{background:var(--danger-bg); color:var(--danger-ink);}
+.feedback .verdict-line{font-weight:700; font-size:0.95rem;}
+.feedback .explain{font-size:0.86rem; line-height:1.5;}
+
+.btn{
+  align-self:flex-start;
+  background:var(--accent);
+  color:var(--accent-ink);
+  border:none;
+  border-radius:999px;
+  padding:10px 22px;
+  font-size:0.9rem;
+  font-weight:700;
+  cursor:pointer;
+}
+.btn:hover{background:var(--accent-strong);}
+.btn:focus-visible{outline:2px solid var(--ink); outline-offset:2px;}
+.btn.wide{align-self:stretch; text-align:center;}
+
+.round-panel{
+  align-items:center;
+  text-align:center;
+}
+.round-panel .big-score{
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:2.2rem;
+  font-weight:700;
+}
+.round-panel .msg{
+  font-size:0.95rem;
+  color:var(--ink-muted);
+}
+.points-line{
+  font-size:0.95rem;
+  font-weight:700;
+  color:var(--accent-strong);
+}
+.points-line.muted{
+  font-weight:400;
+  color:var(--ink-muted);
+}
+
+details.legend{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:10px 14px;
+  font-size:0.85rem;
+  box-shadow:var(--shadow);
+}
+details.legend summary{
+  cursor:pointer;
+  font-weight:700;
+  color:var(--accent-strong);
+}
+details.legend .legend-body{
+  margin-top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  color:var(--ink-muted);
+  line-height:1.6;
+}
+details.legend table{border-collapse:collapse; width:100%;}
+details.legend td{padding:2px 6px; font-variant-numeric:tabular-nums;}
+
+.scoreboard-table{border-collapse:collapse; width:100%; font-size:0.85rem;}
+.scoreboard-table thead td{
+  font-weight:700;
+  color:var(--ink);
+  border-bottom:1px solid var(--border);
+  padding:4px 6px;
+}
+.scoreboard-table tbody td{
+  padding:6px;
+  font-variant-numeric:tabular-nums;
+  border-bottom:1px solid var(--border);
+}
+.scoreboard-table tbody tr:last-child td{border-bottom:none;}
+.scoreboard-table tbody tr:first-child .sb-name{font-weight:700; color:var(--accent-strong);}
+.scoreboard-note{font-size:0.78rem; color:var(--ink-muted);}
+.scoreboard-name-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:0.85rem;
+  color:var(--ink);
+}
+.scoreboard-name-row label{white-space:nowrap;}
+#scoreboard-name-input{
+  flex:1;
+  min-width:0;
+  padding:7px 10px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--ink);
+  font-size:0.85rem;
+}
+
+.title-block h1{cursor:pointer;}
+
+.home-btn{
+  background:var(--surface);
+  border:1px solid var(--accent);
+  color:var(--accent-strong);
+  border-radius:999px;
+  padding:8px 16px;
+  font-size:0.85rem;
+  font-weight:700;
+  cursor:pointer;
+  white-space:nowrap;
+  box-shadow:var(--shadow);
+}
+.home-btn:hover{background:var(--surface-2);}
+
+.hand-view-toggle{
+  display:flex;
+  justify-content:center;
+}
+.view-toggle-btn{
+  background:var(--surface);
+  border:1px solid var(--border);
+  color:var(--ink-muted);
+  border-radius:999px;
+  padding:6px 16px;
+  font-size:0.78rem;
+  font-weight:600;
+  cursor:pointer;
+}
+.view-toggle-btn:hover{background:var(--surface-2); color:var(--ink);}
+
+.home-panel{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+.home-hero{
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  padding:8px 0;
+}
+.home-hero .hero-logo{max-width:220px; width:70%; height:auto;}
+.home-hero .hero-sub{
+  font-size:0.8rem;
+  color:var(--ink-muted);
+}
+.module-section-title{
+  font-size:0.75rem;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  color:var(--ink-muted);
+  margin-bottom:8px;
+}
+.module-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.module-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--surface);
+}
+.module-item.available{
+  cursor:pointer;
+  border-color:var(--accent);
+}
+.module-item.available:hover{background:var(--surface-2);}
+.module-item.locked{opacity:0.55;}
+.module-item.current{
+  border-color:var(--accent);
+  background:var(--surface-2);
+  box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.module-name{font-weight:600; font-size:0.92rem;}
+.points-breakdown{font-size:0.85rem;}
+.points-breakdown b{color:var(--accent-strong); font-variant-numeric:tabular-nums;}
+.module-badge{
+  font-size:0.68rem;
+  padding:3px 9px;
+  border-radius:999px;
+  background:var(--surface-2);
+  color:var(--ink-muted);
+  white-space:nowrap;
+}
+.module-badge.ready{background:var(--success-bg); color:var(--success-ink);}
+
+.size-choice{
+  display:flex;
+  gap:10px;
+}
+.size-btn{
+  flex:1;
+  align-self:stretch;
+}
+.type-btn{
+  flex:1;
+  align-self:stretch;
+  background:var(--surface-2);
+  color:var(--ink);
+  border:1px solid var(--border);
+}
+.type-btn.active{
+  background:var(--accent);
+  color:var(--accent-ink);
+  border-color:var(--accent);
+}
+.context-line{
+  font-size:0.85rem;
+  color:var(--ink-muted);
+  margin-bottom:-4px;
+}
+.context-line b{color:var(--accent-strong); direction:ltr; unicode-bidi:embed; display:inline-block;}
+
+.settings-link{
+  background:none;
+  border:none;
+  color:var(--ink-muted);
+  font-size:0.75rem;
+  text-decoration:underline;
+  cursor:pointer;
+  align-self:center;
+  margin-top:4px;
+  padding:6px;
+}
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+  padding:20px;
+}
+.modal-box{
+  background:var(--surface);
+  border-radius:16px;
+  padding:20px;
+  max-width:360px;
+  width:100%;
+  box-shadow:var(--shadow);
+  max-height:85vh;
+  overflow-y:auto;
+}
+.modal-box h2{
+  margin:0 0 4px;
+  font-size:1.1rem;
+  font-family:Georgia,"Times New Roman",serif;
+  color:var(--ink);
+}
+.admin-btn-row{display:flex; gap:8px;}
+.theme-preset-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.theme-preset-btn{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  cursor:pointer;
+  font-size:0.85rem;
+  font-weight:600;
+  color:var(--ink);
+  font-family:inherit;
+}
+.theme-preset-btn.active{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px var(--accent) inset;
+}
+.theme-preset-swatch{
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  flex-shrink:0;
+  box-shadow:0 0 0 1px var(--border);
+}
+.admin-btn-row .btn{flex:1; align-self:stretch; text-align:center;}
+.admin-color-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  color:var(--ink);
+}
+.admin-color-row label{font-size:0.9rem;}
+.admin-color-row input[type=color]{
+  width:48px;
+  height:36px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:2px;
+  background:var(--surface);
+  cursor:pointer;
+}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="title-block">
+      <h1 id="app-title">שולחן הכרזה</h1>
+      <p>תרגול הכרזה בברידג'</p>
+    </div>
+    <button class="home-btn" id="home-btn-header">🏠 בית</button>
+  </header>
+
+  <div class="home-panel" id="home-panel">
+    <div class="home-hero">
+      <img class="hero-logo" src="data:image/png;base64,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" alt="Easy Bridge">
+      <div class="hero-sub">בוא נתרגל כמה הכרזות</div>
+    </div>
+    <details class="legend">
+      <summary>ניקוד · <span id="rank-points">0</span> נקודות</summary>
+      <div class="legend-body">
+        <div class="points-breakdown">רגילות: <b id="pts-regular">0</b> · ארציות: <b id="pts-national">0</b> · בין-לאומיות: <b id="pts-intl">0</b></div>
+        <div>סבב 10 הכרזות: 100% ← 12 נק' · 80%+ ← 8 נק'</div>
+        <div>סבב 25 הכרזות: 100% ← 30 נק' + נקודה ארצית · 80%+ ← 20 נק'</div>
+        <div>הכרזות חופשיות: נקודה על כל הכרזה נכונה, ועוד בונוס רגיל מצטבר כל 15 הכרזות (1, אז 2, אז 3...)</div>
+        <div>הכרזות חופשיות: בונוס ארצי מצטבר באותה שיטה, כל 50 הכרזות נכונות</div>
+        <div>הכרזות חופשיות: נקודה בין-לאומית אחת (לא מצטברת) על כל 1,000 הכרזות רצופות</div>
+      </div>
+    </details>
+    <details class="legend">
+      <summary>דרגה · <span id="current-rank-name">שחקן חדש</span></summary>
+      <div class="legend-body">
+        <div class="module-list" id="rank-list"></div>
+      </div>
+    </details>
+    <details class="legend" id="scoreboard-section">
+      <summary>🏆 לוח תוצאות משותף</summary>
+      <div class="legend-body">
+        <div class="scoreboard-name-row">
+          <label for="scoreboard-name-input">השם שלי בלוח:</label>
+          <input type="text" id="scoreboard-name-input" maxlength="24" placeholder="הקלד/י שם">
+        </div>
+        <div class="scoreboard-note" id="scoreboard-note"></div>
+        <table class="scoreboard-table">
+          <thead><tr><td>שם</td><td>נק'</td><td>דרגה</td></tr></thead>
+          <tbody id="scoreboard-body"></tbody>
+        </table>
+        <script type="application/json" id="scoreboard-data">[{"name":"עידן מחשב","points":53,"rank":"שיעור מודרך"},{"name":"עידן טלפון","points":213,"rank":"תחרות שני אחה\"צ"}]</script>
+        <button class="btn wide" id="scoreboard-save-btn" style="margin-top:6px;">עדכן את הניקוד שלי בלוח</button>
+      </div>
+    </details>
+    <div>
+      <div class="module-section-title">סוג תרגול</div>
+      <div class="size-choice">
+        <button class="btn type-btn active" id="type-opening-btn" data-type="opening">פתיחות</button>
+        <button class="btn type-btn" id="type-responder-btn" data-type="responder">תשובות למכריז</button>
+        <button class="btn type-btn" id="type-mixed-btn" data-type="mixed">מעורב</button>
+      </div>
+    </div>
+    <div>
+      <div class="module-section-title">בחר אורך סבב</div>
+      <div class="size-choice">
+        <button class="btn size-btn" data-size="10">10 הכרזות</button>
+        <button class="btn size-btn" data-size="25">25 הכרזות</button>
+      </div>
+      <button class="btn wide" id="free-mode-btn" style="margin-top:10px; background:var(--surface-2); color:var(--ink); border:1px solid var(--border);">הכרזות חופשיות - עד הטעות הראשונה</button>
+    </div>
+    <details class="legend">
+      <summary>מודולים נוספים</summary>
+      <div class="legend-body">
+        <div class="module-list">
+          <div class="module-item locked"><span class="module-name">הכרזה חוזרת</span><span class="module-badge">בקרוב</span></div>
+        </div>
+      </div>
+    </details>
+    <button class="settings-link" id="settings-link">⚙️ הגדרות עיצוב</button>
+  </div>
+
+  <div class="modal-overlay" id="admin-overlay" style="display:none;">
+    <div class="modal-box">
+      <div id="admin-panel" style="display:flex; flex-direction:column; gap:14px;">
+        <h2>עיצוב האפליקציה</h2>
+        <div>
+          <div class="module-section-title">ערכות נושא מוכנות</div>
+          <div class="theme-preset-grid" id="theme-preset-grid"></div>
+        </div>
+        <div>
+          <div class="module-section-title">עיצוב אישי</div>
+          <div class="admin-color-row">
+            <label for="color-bg">רקע כללי</label>
+            <input type="color" id="color-bg">
+          </div>
+          <div class="admin-color-row">
+            <label for="color-surface">משטח (כרטיסים)</label>
+            <input type="color" id="color-surface">
+          </div>
+          <div class="admin-color-row">
+            <label for="color-accent">צבע הדגשה (כפתורים)</label>
+            <input type="color" id="color-accent">
+          </div>
+          <div class="admin-color-row">
+            <label for="color-felt">צבע שולחן</label>
+            <input type="color" id="color-felt">
+          </div>
+          <div class="admin-color-row">
+            <label for="color-ink">צבע טקסט</label>
+            <input type="color" id="color-ink">
+          </div>
+        </div>
+        <div class="admin-btn-row">
+          <button class="btn" id="admin-save-btn">שמור</button>
+          <button class="btn" id="admin-reset-btn" style="background:var(--surface-2); color:var(--ink);">איפוס לברירת מחדל</button>
+        </div>
+        <button class="btn wide" id="admin-close-btn" style="background:var(--surface-2); color:var(--ink);">סגירה</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress-block">
+    <div class="progress-label" id="progress-label">יד 1 מתוך 10</div>
+    <div class="dots" id="dots"></div>
+  </div>
+
+  <div class="hand-view-toggle" id="hand-view-toggle">
+    <button class="view-toggle-btn" id="hand-view-btn"></button>
+  </div>
+
+  <div class="hand-tray">
+    <div class="tray-title">היד שלך</div>
+    <div class="hand-row black"><span class="suit-symbol">♠</span><span class="cards" id="row-s"></span></div>
+    <div class="hand-row red"><span class="suit-symbol">♥</span><span class="cards" id="row-h"></span></div>
+    <div class="hand-row red"><span class="suit-symbol">♦</span><span class="cards" id="row-d"></span></div>
+    <div class="hand-row black"><span class="suit-symbol">♣</span><span class="cards" id="row-c"></span></div>
+  </div>
+
+  <div class="table-scene" id="table-scene">
+    <div class="table-felt">
+      <div class="partner-area" id="partner-area"></div>
+      <div class="hand-fan" id="hand-fan"></div>
+    </div>
+  </div>
+
+  <div id="action-panel"></div>
+
+  <details class="legend">
+    <summary id="rules-summary">תזכורת - כללי הפתיחה</summary>
+    <div class="legend-body" id="rules-body">
+      <table>
+        <tr><td>A</td><td>4 נק'</td><td>K</td><td>3 נק'</td><td>Q</td><td>2 נק'</td><td>J</td><td>1 נק'</td></tr>
+      </table>
+      <div>23+ נק' (כל צורה) ← 2♣ מלאכותי</div>
+      <div>20-22 נק' מאוזן ← 2NT</div>
+      <div>15-17 נק' מאוזן ← 1NT</div>
+      <div>חמישייה בסדרת מייג'ור (♠/♥) ← 1 בסדרה הגדולה</div>
+      <div>אחרת, עם 12-19 נק' ← 1 בסדרת המיינור הארוכה יותר (בשוויון: 1♣)</div>
+      <div>פחות מ-12 נק' ← PASS</div>
+      <div style="font-size:0.75rem; opacity:0.85;">* פתיחות חסימה (2 חלש, פתיחות 3) עדיין לא כלולות בתרגול הזה</div>
+    </div>
+  </details>
+</div>
+
+<script>
+/* ---------- theme overrides (applied early, before first paint) ---------- */
+const ADMIN_VARS = ['--bg','--surface','--accent','--felt','--ink'];
+const PERSISTED_VARS = ADMIN_VARS.concat(['--accent-strong']);
+
+const THEME_PRESETS = [
+  {id:'green', name:'ירוק קלאסי', vars:{'--bg':'#eef4ee','--surface':'#ffffff','--accent':'#1f7a52','--felt':'#1f4d3d','--ink':'#17271b'}},
+  {id:'navy', name:'כחול נייבי', vars:{'--bg':'#eef2f7','--surface':'#ffffff','--accent':'#2f6fa8','--felt':'#16324f','--ink':'#16212c'}},
+  {id:'burgundy', name:'בורדו', vars:{'--bg':'#f8eef1','--surface':'#ffffff','--accent':'#9c2b47','--felt':'#5c1a2e','--ink':'#2b1116'}},
+  {id:'black', name:'שחור יוקרתי', vars:{'--bg':'#f1f0ee','--surface':'#ffffff','--accent':'#9c7a2e','--felt':'#161616','--ink':'#1a1a1a'}}
+];
+
+function darkenHex(hex, amount){
+  const n = parseInt(hex.replace('#',''), 16);
+  let r = (n>>16)&255, g = (n>>8)&255, b = n&255;
+  r = Math.max(0, Math.round(r*(1-amount)));
+  g = Math.max(0, Math.round(g*(1-amount)));
+  b = Math.max(0, Math.round(b*(1-amount)));
+  return '#' + [r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+(function loadAdminOverrides(){
+  try{
+    const saved = JSON.parse(localStorage.getItem('bidding-table-theme-overrides'));
+    if(saved){
+      for(const key of Object.keys(saved)){
+        document.documentElement.style.setProperty(key, saved[key]);
+      }
+    }
+  }catch(e){}
+})();
+
+const SUIT_DISPLAY_ORDER = ['♠','♥','♦','♣'];
+const RANKS = ['A','K','Q','J','10','9','8','7','6','5','4','3','2'];
+const RANK_VALUES = {A:4,K:3,Q:2,J:1};
+const SUIT_NAMES = {'♠':'עלה','♥':'לב','♦':'יהלום','♣':'תלתן'};
+
+function buildDeck(){
+  const deck=[];
+  for(const s of SUIT_DISPLAY_ORDER){ for(const r of RANKS){ deck.push({suit:s, rank:r}); } }
+  return deck;
+}
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  return arr;
+}
+function dealHand(){ return shuffle(buildDeck()).slice(0,13); }
+function hcp(hand){ return hand.reduce((s,c)=> s+(RANK_VALUES[c.rank]||0), 0); }
+const PASS_RATE = 0.2;
+function dealHandBiased(){
+  const wantOpen = Math.random() >= PASS_RATE;
+  for(let i=0;i<500;i++){
+    const hand = dealHand();
+    const pts = hcp(hand);
+    if(wantOpen ? pts>=12 : pts<12) return hand;
+  }
+  return dealHand();
+}
+function suitLengths(hand){
+  const l={'♠':0,'♥':0,'♦':0,'♣':0};
+  hand.forEach(c=> l[c.suit]++);
+  return l;
+}
+function isBalanced(lengths){
+  const vals = Object.values(lengths);
+  if(vals.some(v=>v<2)) return false;
+  return vals.filter(v=>v===2).length<=1;
+}
+function suitName(s){ return SUIT_NAMES[s]||s; }
+
+const OPENING_CHOICES = ['Pass','1♣','1♦','1♥','1♠','1NT','2♣','2NT'];
+const POINTS_RULES = {
+  10:{perfect:{points:12}, good:{points:8}},
+  25:{perfect:{points:30, national:1}, good:{points:20}}
+};
+const FREE_MILESTONE = 15;
+const FREE_NATIONAL_MILESTONE = 50;
+const FREE_INTL_MILESTONE = 1000;
+
+const RANK_TIERS = [
+  {name:'שחקן חדש', minPoints:0, badge:'0'},
+  {name:'קורס מתחילים', minPoints:1, badge:'1-10'},
+  {name:'דיור מוגן', minPoints:11, badge:'11-30'},
+  {name:'שיעור מודרך', minPoints:31, badge:'31-100'},
+  {name:'תחרות שני אחה"צ', minPoints:101, badge:'101-250'},
+  {name:'תחרות בוקר', minPoints:251, badge:'251-1,000'},
+  {name:'תחרות ברומטר', minPoints:1001, badge:'1,000+'},
+  {name:'תחרות סימולטנית', minPoints:1001, minNational:1, badge:'1-10 ארצי'},
+  {name:'תחרות ארצית', minPoints:1001, minNational:11, badge:'11-50 ארצי'},
+  {name:'תחרות סגל', minPoints:1001, minNational:51, badge:'51-200 ארצי'},
+  {name:'גביע המדינה', minPoints:1001, minNational:201, badge:'201-500 ארצי'},
+  {name:'גביע העולם', minPoints:1001, minNational:501, minIntl:1, badge:"1-9 בינ'ל"},
+  {name:"צ'אלנג' מול חן", minPoints:1001, minNational:501, minIntl:10, badge:"10+ בינ'ל"}
+];
+function getCurrentRank(points, national, intl){
+  let current = RANK_TIERS[0];
+  for(const t of RANK_TIERS){
+    if(points>=t.minPoints && national>=(t.minNational||0) && intl>=(t.minIntl||0)){
+      current = t;
+    }
+  }
+  return current;
+}
+
+/* ---------- opening-bid engine (verified against Toolbox source PDFs) ---------- */
+
+function openBestSuit(lengths, pts){
+  const majors=['♠','♥'];
+  const majorLens = majors.map(s=>({s,l:lengths[s]})).filter(x=>x.l>=5).sort((a,b)=> b.l-a.l || (a.s==='♠'?-1:1));
+  if(majorLens.length){
+    const top=majorLens[0];
+    return {bid:'1'+top.s, explain:`${pts} נק', ${top.l} קלפים ב${suitName(top.s)} - חמישייה במייג'ור, פותחים בה`};
+  }
+  if(lengths['♦']>lengths['♣']) return {bid:'1♦', explain:`${pts} נק', ${lengths['♦']} קלפים ביהלום - אין חמישייה במייג'ור, פותחים בסדרת המיינור הארוכה יותר`};
+  if(lengths['♣']>lengths['♦']) return {bid:'1♣', explain:`${pts} נק', ${lengths['♣']} קלפים בתלתן - אין חמישייה במייג'ור, פותחים בסדרת המיינור הארוכה יותר`};
+  return {bid:'1♣', explain:`${pts} נק' - שתי סדרות המיינור שוות באורכן, פותחים 1♣`};
+}
+
+function openingBid(hand){
+  const lengths = suitLengths(hand);
+  const pts = hcp(hand);
+  const balanced = isBalanced(lengths);
+  if(pts>=23) return {bid:'2♣', explain:`${pts} נק' - יד חזקה מאוד (23+), פתיחה מלאכותית 2♣`};
+  if(balanced && pts>=20) return {bid:'2NT', explain:`${pts} נק', יד מאוזנת - פתיחת 2NT (20-22 נק')`};
+  if(balanced && pts>=15 && pts<=17) return {bid:'1NT', explain:`${pts} נק', יד מאוזנת - פתיחת 1NT (15-17 נק')`};
+  if(pts>=12) return openBestSuit(lengths, pts);
+  return {bid:'Pass', explain:`${pts} נק' - פחות מ-12, חלש מדי לפתיחה`};
+}
+
+/* ---------- responder-bid engine (verified against Toolbox source PDFs; 2♣ opening not yet covered) ---------- */
+
+const RESPONDER_OPEN_POOL = ['1♣','1♦','1♥','1♠','1NT','2NT'];
+
+const STRAIN_ORDER = ['♣','♦','♥','♠','NT'];
+function buildAllBids(){
+  const arr=[];
+  for(let lvl=1; lvl<=7; lvl++){ for(const s of STRAIN_ORDER){ arr.push(lvl+s); } }
+  return arr;
+}
+const MASTER_POOL = buildAllBids();
+function bidRank(bid){
+  if(bid==='Pass') return -1;
+  const level = parseInt(bid[0],10);
+  const strain = bid.slice(1);
+  return (level-1)*5 + STRAIN_ORDER.indexOf(strain);
+}
+function buildResponderChoices(correctBid, openBid){
+  const floor = bidRank(openBid);
+  let candidates = MASTER_POOL.filter(b => bidRank(b)>floor && bidRank(b)<=floor+10 && b!==correctBid);
+  shuffle(candidates);
+  let choices = candidates.slice(0,4);
+  if(!choices.includes(correctBid)) choices.push(correctBid);
+  if(!choices.includes('Pass')) choices.push('Pass');
+  choices = [...new Set(choices)];
+  choices.sort((a,b)=> bidRank(a)-bidRank(b));
+  return choices;
+}
+
+function respondToNT(lengths, pts, level){
+  const askLevel = level===1 ? 2 : 3;
+  const hasMajor4 = lengths['♥']>=4 || lengths['♠']>=4;
+
+  if(lengths['♠']>=5){
+    return {bid:askLevel+'♥', explain:`${pts} נק', ${lengths['♠']} קלפים בעלה - טרנספר לעלה (הפותח משלים אוטומטית ל-${askLevel}♠, בלי שבירת טרנספר)`};
+  }
+  if(lengths['♥']>=5){
+    return {bid:askLevel+'♦', explain:`${pts} נק', ${lengths['♥']} קלפי לב - טרנספר ללב (הפותח משלים אוטומטית ל-${askLevel}♥, בלי שבירת טרנספר)`};
+  }
+
+  if(level===1){
+    if(pts<=7) return {bid:'Pass', explain:`${pts} נק' - חלש מדי להמשיך, נשארים ב-1NT`};
+    if(pts>=8 && hasMajor4) return {bid:'2♣', explain:`${pts} נק', רביעייה בסדרה גבוהה - סטיימן, שואלים אם לפותח יש רביעייה במייג'ור`};
+    if(pts<=9) return {bid:'2NT', explain:`${pts} נק' - הזמנה למשחק, יד מאוזנת ללא רביעייה גבוהה`};
+    return {bid:'3NT', explain:`${pts} נק' - מספיק לחוזה משחק, יד מאוזנת ללא רביעייה גבוהה`};
+  }
+  if(pts<=4) return {bid:'Pass', explain:`${pts} נק' - חלש מדי להמשיך`};
+  if(hasMajor4) return {bid:'3♣', explain:`${pts} נק', רביעייה בסדרה גבוהה - סטיימן`};
+  return {bid:'3NT', explain:`${pts} נק' - מספיק לחוזה משחק, יד מאוזנת ללא רביעייה גבוהה`};
+}
+
+function respondToSuit(lengths, pts, suit){
+  const isMajor = suit==='♥' || suit==='♠';
+  const support = lengths[suit];
+  const minSupport = isMajor ? 3 : 5;
+
+  if(support>=minSupport){
+    if(pts<6) return {bid:'Pass', explain:`${pts} נק' - פחות מדי אפילו עם התאמה`};
+    if(pts<=10) return {bid:'2'+suit, explain:`${pts} נק', ${support} קלפי תמיכה - הגבהה פשוטה (6-10 נק')`};
+    if(pts<=12) return {bid:'3'+suit, explain:`${pts} נק', ${support} קלפי תמיכה - הגבהה מזמינה (11-12 נק')`};
+    if(isMajor) return {bid:'4'+suit, explain:`${pts} נק', ${support} קלפי תמיכה - קפיצה למשחק (13+ נק')`};
+    return {bid:'3NT', explain:`${pts} נק' - ערך למשחק, מעדיפים 3NT על פני חמישה במיינור`};
+  }
+
+  if(pts<6) return {bid:'Pass', explain:`${pts} נק' - חלש מדי לתשובה`};
+
+  const oneLevelOrder =
+    suit==='♣' ? ['♥','♠','♦'] :
+    suit==='♦' ? ['♥','♠'] :
+    suit==='♥' ? ['♠'] : [];
+  for(const s of oneLevelOrder){
+    if(lengths[s]>=4){
+      return {bid:'1'+s, explain:`${pts} נק', ${lengths[s]} קלפים ב${suitName(s)} - סדרה חדשה בדרג 1 (6+ נק')`};
+    }
+  }
+
+  if(pts>=11){
+    const belowOrder =
+      suit==='♦' ? ['♣'] :
+      suit==='♥' ? ['♦','♣'] :
+      suit==='♠' ? ['♥','♦','♣'] : [];
+    let best = null;
+    for(const s of belowOrder){
+      if(lengths[s]>=5 && (!best || lengths[s]>lengths[best])) best = s;
+    }
+    if(best) return {bid:'2'+best, explain:`${pts} נק', ${lengths[best]} קלפים ב${suitName(best)} - סדרה חדשה בדרג 2 (11+ נק', "רשת ביטחון")`};
+  }
+
+  if(pts<=9) return {bid:'1NT', explain:`${pts} נק' - אין התאמה או סדרה מתאימה, יד מוגבלת`};
+  if(pts<=12) return {bid:'2NT', explain:`${pts} נק' - הזמנה, יד מאוזנת`};
+  return {bid:'3NT', explain:`${pts} נק' - ערך למשחק, יד מאוזנת`};
+}
+
+function responderBid(hand, openBid){
+  const lengths = suitLengths(hand);
+  const pts = hcp(hand);
+  if(openBid==='1NT') return respondToNT(lengths, pts, 1);
+  if(openBid==='2NT') return respondToNT(lengths, pts, 2);
+  return respondToSuit(lengths, pts, openBid.slice(1));
+}
+
+/* ---------- UI state & rendering ---------- */
+
+let stats = {correct:0, total:0, points:0, nationalPoints:0, intlPoints:0};
+try{
+  const saved = JSON.parse(localStorage.getItem('bidding-table-openings-score'));
+  if(saved && typeof saved.correct==='number') stats = Object.assign({correct:0, total:0, points:0, nationalPoints:0, intlPoints:0}, saved);
+}catch(e){}
+function saveStats(){ try{ localStorage.setItem('bidding-table-openings-score', JSON.stringify(stats)); }catch(e){} }
+
+/* ---------- shared score board (self-publishing artifact) ---------- */
+let scoreboardReadOnly = false;
+const scoreboardApiAvailable = !!(window.claude && typeof window.claude.use === 'function');
+
+let SCOREBOARD = [];
+try{
+  const dataEl = document.getElementById('scoreboard-data');
+  if(dataEl){
+    const parsed = JSON.parse(dataEl.textContent);
+    if(Array.isArray(parsed)) SCOREBOARD = parsed;
+  }
+}catch(e){}
+
+function renderScoreboardTable(){
+  const tbody = document.getElementById('scoreboard-body');
+  if(!tbody) return;
+  const sorted = SCOREBOARD.slice().sort((a,b)=> b.points - a.points);
+  tbody.innerHTML = '';
+  sorted.forEach(entry=>{
+    const row = document.createElement('tr');
+    const nameCell = document.createElement('td');
+    nameCell.className = 'sb-name';
+    nameCell.textContent = entry.name;
+    const ptsCell = document.createElement('td');
+    ptsCell.className = 'sb-points';
+    ptsCell.textContent = String(entry.points);
+    const rankCell = document.createElement('td');
+    rankCell.className = 'sb-rank';
+    rankCell.textContent = entry.rank;
+    row.appendChild(nameCell);
+    row.appendChild(ptsCell);
+    row.appendChild(rankCell);
+    tbody.appendChild(row);
+  });
+}
+
+function updateScoreboardNote(msgOverride){
+  const note = document.getElementById('scoreboard-note');
+  if(!note) return;
+  if(msgOverride){
+    note.textContent = msgOverride;
+  } else if(scoreboardReadOnly){
+    note.textContent = 'הניקוד שלך נשמר במכשיר הזה, אבל אין לך הרשאת עריכה לארטיפקט כדי לשתף אותו לאחרים.';
+  } else if(!scoreboardApiAvailable){
+    note.textContent = 'הלוח מוצג באופן מקומי בלבד בתצוגה הזו (שיתוף לא זמין כאן).';
+  } else {
+    note.textContent = 'משותף לכל מי שיש לו גישת עריכה לארטיפקט הזה.';
+  }
+}
+
+async function saveToScoreboard(){
+  const input = document.getElementById('scoreboard-name-input');
+  const name = input.value.trim().slice(0, 24);
+  if(!name){
+    goHome();
+    document.getElementById('scoreboard-section').open = true;
+    updateScoreboardNote('קודם הזן/י שם כאן, ואז לחצי על הכפתור שוב.');
+    input.focus();
+    return;
+  }
+  input.value = name;
+  try{ localStorage.setItem('bidding-table-player-name', name); }catch(e){}
+
+  const rankName = getCurrentRank(stats.points, stats.nationalPoints, stats.intlPoints).name;
+  const existing = SCOREBOARD.find(e=> e.name===name);
+  if(existing){
+    existing.points = stats.points;
+    existing.rank = rankName;
+  } else {
+    SCOREBOARD.push({name, points: stats.points, rank: rankName});
+  }
+  renderScoreboardTable();
+
+  if(!scoreboardApiAvailable){
+    updateScoreboardNote();
+    return;
+  }
+  updateScoreboardNote('שומר ומשתף...');
+  try{
+    const api = await window.claude.use('artifact');
+    if(!api){ updateScoreboardNote(); return; }
+    const res = await fetch(location.href, {cache:'no-store'});
+    if(!res.ok) throw new Error('fetch failed');
+    let html = await res.text();
+    const newBlock = '<script type="application/json" id="scoreboard-data">' + JSON.stringify(SCOREBOARD) + '<\/script>';
+    const pattern = /<script type="application\/json" id="scoreboard-data">[\s\S]*?<\/script>/;
+    if(!pattern.test(html)) throw new Error('scoreboard block not found');
+    html = html.replace(pattern, newBlock);
+    await api.publish(html);
+    updateScoreboardNote('✅ עודכן ושותף בלוח!');
+  }catch(err){
+    if(err && (err.code==='not_writer' || err.code==='not_granted')){
+      scoreboardReadOnly = true;
+      updateScoreboardNote();
+    } else if(err && err.code==='conflict'){
+      updateScoreboardNote('מישהו אחר עדכן בו-זמנית - הניקוד שלך נשמר, נסה/י שוב בעוד רגע.');
+    } else {
+      updateScoreboardNote('הניקוד נשמר במכשיר הזה, אבל השיתוף לא הצליח כרגע. נסה/י שוב.');
+    }
+  }
+}
+
+let round = null;
+let appState = 'home';
+let practiceType = 'opening';
+
+let handViewMode = 'fan';
+try{
+  const savedView = localStorage.getItem('bidding-table-hand-view');
+  if(savedView==='fan' || savedView==='list') handViewMode = savedView;
+}catch(e){}
+function toggleHandView(){
+  handViewMode = handViewMode==='fan' ? 'list' : 'fan';
+  try{ localStorage.setItem('bidding-table-hand-view', handViewMode); }catch(e){}
+  render();
+}
+
+function goHome(){
+  appState = 'home';
+  round = null;
+  render();
+}
+
+function setPracticeType(type){
+  practiceType = type;
+  document.getElementById('type-opening-btn').classList.toggle('active', type==='opening');
+  document.getElementById('type-responder-btn').classList.toggle('active', type==='responder');
+  document.getElementById('type-mixed-btn').classList.toggle('active', type==='mixed');
+  renderRulesLegend();
+}
+
+function startRound(size){
+  appState = 'round';
+  const isFree = size==='free';
+  round = {
+    type: practiceType,
+    mode: isFree ? 'free' : 'fixed',
+    size: isFree ? null : size,
+    handIndex:0,
+    results:[],
+    pointsEarned:0,
+    nationalEarned:0,
+    intlEarned:0,
+    hand:null,
+    openBid:null,
+    pending:null
+  };
+  dealNextHand();
+}
+
+function dealNextHand(){
+  round.handIndex++;
+  if(round.mode==='fixed' && round.handIndex>round.size){
+    round.pending = {phase:'round-summary'};
+    render();
+    return;
+  }
+  const subType = round.type==='mixed'
+    ? (Math.random()<0.5 ? 'opening' : 'responder')
+    : round.type;
+  round.currentSubType = subType;
+
+  let decision, choices;
+  if(subType==='responder'){
+    round.hand = dealHand();
+    round.openBid = RESPONDER_OPEN_POOL[Math.floor(Math.random()*RESPONDER_OPEN_POOL.length)];
+    decision = responderBid(round.hand, round.openBid);
+    choices = buildResponderChoices(decision.bid, round.openBid);
+  } else {
+    round.hand = dealHandBiased();
+    round.openBid = null;
+    decision = openingBid(round.hand);
+    choices = OPENING_CHOICES;
+  }
+  round.pending = {
+    phase:'question',
+    correctBid:decision.bid,
+    explain:decision.explain,
+    choices:choices
+  };
+  render();
+}
+
+function onPick(bid){
+  const p = round.pending;
+  const isCorrect = bid===p.correctBid;
+  round.results.push(isCorrect);
+  stats.total++;
+  if(isCorrect) stats.correct++;
+
+  if(round.mode==='free' && isCorrect){
+    const correctSoFar = round.results.filter(Boolean).length;
+
+    let gained = 1;
+    if(correctSoFar % FREE_MILESTONE === 0){
+      gained += correctSoFar / FREE_MILESTONE;
+    }
+    round.pointsEarned += gained;
+    stats.points += gained;
+
+    if(correctSoFar % FREE_NATIONAL_MILESTONE === 0){
+      const gainedNational = correctSoFar / FREE_NATIONAL_MILESTONE;
+      round.nationalEarned += gainedNational;
+      stats.nationalPoints += gainedNational;
+    }
+
+    if(correctSoFar % FREE_INTL_MILESTONE === 0){
+      round.intlEarned += 1;
+      stats.intlPoints += 1;
+    }
+  }
+
+  saveStats();
+  round.pending = {phase:'feedback', bid, correctBid:p.correctBid, explain:p.explain, isCorrect};
+  render();
+}
+
+function onContinue(){
+  if(round.mode==='free' && round.pending.phase==='feedback' && !round.pending.isCorrect){
+    round.pending = {phase:'round-summary'};
+    render();
+    return;
+  }
+  dealNextHand();
+}
+
+function suitColorClass(bid){
+  if(bid==='Pass') return 'pass';
+  if(bid.endsWith('NT')) return 'nt';
+  const s = bid.slice(-1);
+  return (s==='♥'||s==='♦') ? 'red' : 'black';
+}
+function formatBid(bid){ return bid==='Pass' ? 'PASS' : bid; }
+
+function render(){
+  const isHome = appState==='home';
+  const useFan = !isHome && handViewMode==='fan';
+  document.getElementById('home-panel').style.display = isHome ? 'flex' : 'none';
+  document.getElementById('home-btn-header').style.display = isHome ? 'none' : 'inline-block';
+  document.querySelector('.progress-block').style.display = isHome ? 'none' : 'flex';
+  document.getElementById('hand-view-toggle').style.display = isHome ? 'none' : 'flex';
+  document.querySelector('.hand-tray').style.display = (!isHome && !useFan) ? 'flex' : 'none';
+  document.getElementById('table-scene').style.display = useFan ? 'block' : 'none';
+  document.getElementById('hand-view-btn').textContent = useFan ? '📋 עבור לתצוגת רשימה' : '🎴 עבור לתצוגת מניפה';
+  if(isHome){
+    document.getElementById('action-panel').innerHTML = '';
+    renderRankSection();
+    renderScoreboardTable();
+    updateScoreboardNote();
+    return;
+  }
+  renderProgress();
+  if(useFan){ renderHandFan(); renderPartnerArea(); } else { renderHand(); }
+  renderActionPanel();
+}
+
+function renderRankSection(){
+  document.getElementById('rank-points').textContent = stats.points;
+  document.getElementById('pts-regular').textContent = stats.points;
+  document.getElementById('pts-national').textContent = stats.nationalPoints;
+  document.getElementById('pts-intl').textContent = stats.intlPoints;
+
+  const current = getCurrentRank(stats.points, stats.nationalPoints, stats.intlPoints);
+  document.getElementById('current-rank-name').textContent = current.name;
+  const list = document.getElementById('rank-list');
+  list.innerHTML = '';
+  RANK_TIERS.forEach(t=>{
+    const isCurrent = t===current;
+    const row = document.createElement('div');
+    row.className = 'module-item' + (isCurrent ? ' current' : '');
+    const badgeClass = 'module-badge' + (isCurrent ? ' ready' : '');
+    row.innerHTML = `<span class="module-name">${t.name}</span><span class="${badgeClass}">${t.badge}</span>`;
+    list.appendChild(row);
+  });
+}
+
+const POINTS_TABLE_HTML = `<table><tr><td>A</td><td>4 נק'</td><td>K</td><td>3 נק'</td><td>Q</td><td>2 נק'</td><td>J</td><td>1 נק'</td></tr></table>`;
+
+const OPENING_RULES_HTML = `
+  ${POINTS_TABLE_HTML}
+  <div>23+ נק' (כל צורה) ← 2♣ מלאכותי</div>
+  <div>20-22 נק' מאוזן ← 2NT</div>
+  <div>15-17 נק' מאוזן ← 1NT</div>
+  <div>חמישייה בסדרת מייג'ור (♠/♥) ← 1 בסדרה הגדולה</div>
+  <div>אחרת, עם 12-19 נק' ← 1 בסדרת המיינור הארוכה יותר (בשוויון: 1♣)</div>
+  <div>פחות מ-12 נק' ← PASS</div>
+  <div style="font-size:0.75rem; opacity:0.85;">* פתיחות חסימה (2 חלש, פתיחות 3) עדיין לא כלולות בתרגול הזה</div>
+`;
+
+const RESPONDER_RULES_HTML = `
+  ${POINTS_TABLE_HTML}
+  <div>תמיכה בסדרת הפותח: 3+ קלפים במייג'ור, 5+ במיינור</div>
+  <div>עם תמיכה: 6-10 נק' ← הגבהה פשוטה · 11-12 ← הגבהה מזמינה · 13+ ← משחק (מייג'ור) / 3NT (מיינור)</div>
+  <div>בלי תמיכה: סדרה חדשה בדרג 1 (6+ נק', 4+ קלפים) קודמת לכל</div>
+  <div>בלי תמיכה, בלי דרג 1: סדרה חדשה בדרג 2 דורשת 11+ נק' ו-5+ קלפים ("רשת ביטחון")</div>
+  <div>אחרת: 1NT = 6-9 נק' · 2NT = 10-12 נק' · 3NT = 13+ נק'</div>
+  <div>חמישייה (או יותר) במייג'ור ← טרנספר (2♦/2♥ אחרי 1NT, 3♦/3♥ אחרי 2NT) - קודם לכל דבר אחר, הפותח משלים אוטומטית</div>
+  <div>תשובות ל-1NT (בלי חמישייה במייג'ור): 0-7 ← PASS · 8+ עם רביעייה גבוהה ← 2♣ (סטיימן) · 8-9 ← 2NT · 10+ ← 3NT</div>
+  <div>תשובות ל-2NT (בלי חמישייה במייג'ור): 0-4 ← PASS · עם רביעייה גבוהה ← 3♣ (סטיימן) · אחרת ← 3NT</div>
+  <div style="font-size:0.75rem; opacity:0.85;">* תשובות לפתיחת 2♣ החזקה עדיין לא כלולות בתרגול הזה</div>
+`;
+
+function renderRulesLegend(){
+  const summary = document.getElementById('rules-summary');
+  const body = document.getElementById('rules-body');
+  if(practiceType==='responder'){
+    summary.textContent = 'תזכורת - כללי התשובה';
+    body.innerHTML = RESPONDER_RULES_HTML;
+  } else if(practiceType==='mixed'){
+    summary.textContent = 'תזכורת - כללי הפתיחה והתשובה';
+    body.innerHTML = `
+      <div style="font-size:0.75rem; opacity:0.85;">כל יד יכולה להיות פתיחה או תשובה - בודקים בהתאם</div>
+      <div class="module-section-title" style="margin-top:4px;">פתיחות</div>
+      ${OPENING_RULES_HTML}
+      <div class="module-section-title" style="margin-top:4px;">תשובות</div>
+      ${RESPONDER_RULES_HTML}
+    `;
+  } else {
+    summary.textContent = 'תזכורת - כללי הפתיחה';
+    body.innerHTML = OPENING_RULES_HTML;
+  }
+}
+
+function renderProgress(){
+  const label = document.getElementById('progress-label');
+  const dotsEl = document.getElementById('dots');
+  if(!round){ label.textContent=''; dotsEl.innerHTML=''; return; }
+  if(round.mode==='free'){
+    dotsEl.innerHTML = '';
+    const streak = round.results.filter(Boolean).length;
+    label.textContent = round.pending && round.pending.phase==='round-summary'
+      ? 'הסבב הסתיים'
+      : `הכרזה ${round.handIndex} · רצף: ${streak} · נקודות: ${round.pointsEarned}`;
+    return;
+  }
+  const shownIndex = Math.min(round.handIndex, round.size);
+  label.textContent = round.pending && round.pending.phase==='round-summary'
+    ? 'הסבב הושלם'
+    : `יד ${shownIndex} מתוך ${round.size}`;
+  dotsEl.innerHTML = '';
+  for(let i=0;i<round.size;i++){
+    const dot = document.createElement('div');
+    let cls = 'dot';
+    if(i<round.results.length){
+      cls += round.results[i] ? ' ok' : ' bad';
+    } else if(i===round.handIndex-1){
+      cls += ' current';
+    }
+    dot.className = cls;
+    dot.textContent = i<round.results.length ? (round.results[i] ? '✓' : '✕') : '';
+    dotsEl.appendChild(dot);
+  }
+}
+
+function renderHand(){
+  if(!round || !round.hand){
+    ['s','h','d','c'].forEach(k=>{
+      const el = document.getElementById('row-'+k);
+      el.textContent='—'; el.classList.add('empty');
+    });
+    return;
+  }
+  const bySuit = {'♠':[],'♥':[],'♦':[],'♣':[]};
+  round.hand.forEach(c=> bySuit[c.suit].push(c.rank));
+  for(const s of SUIT_DISPLAY_ORDER){
+    bySuit[s].sort((a,b)=> RANKS.indexOf(a)-RANKS.indexOf(b));
+  }
+  const ids = {'♠':'row-s','♥':'row-h','♦':'row-d','♣':'row-c'};
+  for(const s of SUIT_DISPLAY_ORDER){
+    const el = document.getElementById(ids[s]);
+    if(bySuit[s].length){
+      el.textContent = bySuit[s].join('  ');
+      el.classList.remove('empty');
+    } else {
+      el.textContent = '—';
+      el.classList.add('empty');
+    }
+  }
+}
+
+function renderPartnerArea(){
+  const el = document.getElementById('partner-area');
+  if(round && round.openBid){
+    const cls = suitColorClass(round.openBid);
+    el.innerHTML = `
+      <span class="partner-bid-label">השותף הכריז</span>
+      <span class="partner-bid-tile ${cls}">${formatBid(round.openBid)}</span>
+    `;
+  } else {
+    el.innerHTML = `<span class="partner-indicator">🂠 🂠 🂠 🂠 · השותף</span>`;
+  }
+}
+
+function renderHandFan(){
+  const container = document.getElementById('hand-fan');
+  container.innerHTML = '';
+  if(!round || !round.hand) return;
+
+  const bySuit = {'♠':[],'♥':[],'♦':[],'♣':[]};
+  round.hand.forEach(c=> bySuit[c.suit].push(c.rank));
+  for(const s of SUIT_DISPLAY_ORDER){
+    bySuit[s].sort((a,b)=> RANKS.indexOf(a)-RANKS.indexOf(b));
+  }
+  const flat = [];
+  SUIT_DISPLAY_ORDER.forEach(s=> bySuit[s].forEach(r=> flat.push({suit:s, rank:r})));
+
+  const n = flat.length;
+  if(n===0) return;
+  const center = (n-1)/2;
+  let suitBoundaries = 0;
+  for(let i=1;i<n;i++){ if(flat[i].suit !== flat[i-1].suit) suitBoundaries++; }
+
+  const availableWidth = container.clientWidth || 300;
+  const cardWidth = Math.max(24, Math.min(40, availableWidth*0.085));
+  const cardHeight = cardWidth*1.45;
+  const angleStep = 3.6;
+  const maxAngle = center*angleStep;
+  const swingMargin = cardHeight*Math.sin(maxAngle*Math.PI/180) + 6;
+  const usableWidth = Math.max(cardWidth*n*0.4, availableWidth - 2*swingMargin);
+  const suitGap = cardWidth*0.32;
+  const minStep = cardWidth*0.28;
+  const rawStep = n>1 ? (usableWidth - cardWidth - suitBoundaries*suitGap) / (n-1) : 0;
+  const stepX = Math.max(minStep, rawStep);
+
+  const xPositions = [];
+  let x = 0;
+  for(let i=0;i<n;i++){
+    if(i>0){
+      x += stepX;
+      if(flat[i].suit !== flat[i-1].suit) x += suitGap;
+    }
+    xPositions.push(x);
+  }
+  const totalWidth = xPositions[n-1] + cardWidth;
+  const offsetX = -totalWidth/2;
+
+  container.style.height = Math.round(cardHeight + center*1.8 + 6) + 'px';
+
+  flat.forEach((c, i)=>{
+    const el = document.createElement('div');
+    const isRed = c.suit==='♥' || c.suit==='♦';
+    el.className = 'fan-card ' + (isRed ? 'red' : 'black');
+    const angle = (i-center)*angleStep;
+    const arcY = Math.abs(i-center)*1.8;
+    const left = offsetX + xPositions[i];
+    el.style.width = cardWidth+'px';
+    el.style.height = cardHeight+'px';
+    el.style.marginLeft = (-cardWidth/2)+'px';
+    el.style.fontSize = Math.max(9, cardWidth*0.34)+'px';
+    el.style.left = `calc(50% + ${left}px)`;
+    el.style.zIndex = i;
+    el.style.transform = `translateY(${arcY}px) rotate(${angle}deg)`;
+    el.innerHTML = `<span class="fc-rank">${c.rank}</span><span class="fc-suit">${c.suit}</span>`;
+    container.appendChild(el);
+  });
+}
+
+function renderActionPanel(){
+  const panel = document.getElementById('action-panel');
+  if(!round || !round.pending){ panel.innerHTML=''; return; }
+  const p = round.pending;
+
+  if(p.phase==='question'){
+    const contextLine = round.currentSubType==='responder'
+      ? `<div class="context-line">השותף פתח <b>${formatBid(round.openBid)}</b></div>`
+      : '';
+    const promptText = round.currentSubType==='responder' ? 'מה התשובה הנכונה?' : 'מה ההכרזה הנכונה?';
+    panel.innerHTML = `
+      <div class="panel">
+        ${contextLine}
+        <div class="prompt">${promptText}</div>
+        <div class="choices" id="choices-grid"></div>
+      </div>`;
+    const grid = document.getElementById('choices-grid');
+    p.choices.forEach(bid=>{
+      const btn = document.createElement('button');
+      btn.className = 'tile ' + suitColorClass(bid);
+      btn.textContent = formatBid(bid);
+      btn.addEventListener('click', ()=> onPick(bid));
+      grid.appendChild(btn);
+    });
+    return;
+  }
+
+  if(p.phase==='feedback'){
+    let continueLabel;
+    if(round.mode==='free'){
+      continueLabel = p.isCorrect ? 'המשך' : 'סיום';
+    } else {
+      continueLabel = round.handIndex>=round.size ? 'סיום הסבב' : 'המשך';
+    }
+    panel.innerHTML = `
+      <div class="panel">
+        <div class="feedback ${p.isCorrect ? 'ok' : 'bad'}">
+          <div class="verdict-line">${p.isCorrect ? '✅ נכון!' : `❌ לא בדיוק - ההכרזה הנכונה: <span style="direction:ltr; unicode-bidi:embed; display:inline-block;">${formatBid(p.correctBid)}</span>`}</div>
+          <div class="explain">${p.explain}</div>
+        </div>
+        <button class="btn" id="continue-btn">${continueLabel}</button>
+      </div>`;
+    document.getElementById('continue-btn').addEventListener('click', onContinue);
+    return;
+  }
+
+  if(p.phase==='round-summary' && round.mode==='free'){
+    const streak = round.results.filter(Boolean).length;
+    let msg;
+    if(streak===0) msg = 'לא נורא, בפעם הבאה!';
+    else if(streak>=15) msg = 'רצף מרשים!';
+    else if(streak>=8) msg = 'יפה מאוד!';
+    else msg = 'המשך להתאמן!';
+    const earnedParts = [];
+    if(round.pointsEarned>0) earnedParts.push(`${round.pointsEarned} רגילות`);
+    if(round.nationalEarned>0) earnedParts.push(`${round.nationalEarned} ארציות`);
+    if(round.intlEarned>0) earnedParts.push(`${round.intlEarned} בין-לאומיות`);
+    const pointsLine = earnedParts.length
+      ? `<div class="points-line">+${earnedParts.join(' · ')} נקודות! 🎉</div>`
+      : `<div class="points-line muted">אין נקודות הפעם</div>`;
+    panel.innerHTML = `
+      <div class="panel round-panel">
+        <div class="big-score">${streak}</div>
+        <div class="msg">הכרזות נכונות ברצף · ${msg}</div>
+        ${pointsLine}
+        <button class="btn wide" id="new-round-btn">נסה שוב (חופשי)</button>
+        <button class="btn wide" id="board-btn" style="background:var(--surface-2); color:var(--ink);">🏆 עדכן בלוח התוצאות</button>
+        <button class="btn wide" id="home-btn" style="background:var(--surface-2); color:var(--ink);">לעמוד הבית</button>
+      </div>`;
+    document.getElementById('new-round-btn').addEventListener('click', ()=> startRound('free'));
+    document.getElementById('board-btn').addEventListener('click', saveToScoreboard);
+    document.getElementById('home-btn').addEventListener('click', goHome);
+    return;
+  }
+
+  if(p.phase==='round-summary'){
+    const correctCount = round.results.filter(Boolean).length;
+    const pct = correctCount/round.size;
+    let msg;
+    if(correctCount===round.size) msg = 'מושלם! כל הכבוד!';
+    else if(pct>=0.8) msg = 'מצוין!';
+    else if(pct>=0.6) msg = 'טוב, ממשיכים להתחזק';
+    else msg = 'כדאי לעבור שוב על התזכורת למטה';
+    const roundSize = round.size;
+
+    let pointsLine = '';
+    const rule = POINTS_RULES[round.size];
+    if(rule){
+      let reward = null;
+      if(correctCount===round.size) reward = rule.perfect;
+      else if(pct>=0.8) reward = rule.good;
+      if(reward){
+        stats.points += reward.points;
+        const rewardParts = [`${reward.points} רגילות`];
+        if(reward.national){
+          stats.nationalPoints += reward.national;
+          rewardParts.push(`${reward.national} ארצית`);
+        }
+        saveStats();
+        pointsLine = `<div class="points-line">+${rewardParts.join(' + ')} נקודות! 🎉</div>`;
+      } else {
+        pointsLine = `<div class="points-line muted">אין נקודות הפעם - 80%+ מזכה בנקודות</div>`;
+      }
+    }
+
+    panel.innerHTML = `
+      <div class="panel round-panel">
+        <div class="big-score">${correctCount}/${round.size}</div>
+        <div class="msg">${msg}</div>
+        ${pointsLine}
+        <button class="btn wide" id="new-round-btn">סבב חדש (${roundSize} הכרזות)</button>
+        <button class="btn wide" id="board-btn" style="background:var(--surface-2); color:var(--ink);">🏆 עדכן בלוח התוצאות</button>
+        <button class="btn wide" id="home-btn" style="background:var(--surface-2); color:var(--ink);">לעמוד הבית</button>
+      </div>`;
+    document.getElementById('new-round-btn').addEventListener('click', ()=> startRound(roundSize));
+    document.getElementById('board-btn').addEventListener('click', saveToScoreboard);
+    document.getElementById('home-btn').addEventListener('click', goHome);
+    return;
+  }
+}
+
+/* ---------- design settings panel ---------- */
+
+function openAdminOverlay(){
+  document.getElementById('admin-overlay').style.display = 'flex';
+  syncColorInputsFromCurrent();
+  renderThemePresetGrid();
+}
+function closeAdminOverlay(){
+  document.getElementById('admin-overlay').style.display = 'none';
+}
+function currentVarValue(varName){
+  const inline = document.documentElement.style.getPropertyValue(varName);
+  if(inline) return inline.trim();
+  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+}
+function syncColorInputsFromCurrent(){
+  document.getElementById('color-bg').value = currentVarValue('--bg');
+  document.getElementById('color-surface').value = currentVarValue('--surface');
+  document.getElementById('color-accent').value = currentVarValue('--accent');
+  document.getElementById('color-felt').value = currentVarValue('--felt');
+  document.getElementById('color-ink').value = currentVarValue('--ink');
+}
+function bindColorInput(id, varName){
+  document.getElementById(id).addEventListener('input', (e)=>{
+    document.documentElement.style.setProperty(varName, e.target.value);
+    if(varName === '--accent'){
+      document.documentElement.style.setProperty('--accent-strong', darkenHex(e.target.value, 0.25));
+    }
+    renderThemePresetGrid();
+  });
+}
+function applyThemeVars(vars){
+  ADMIN_VARS.forEach(v=>{
+    if(vars[v]) document.documentElement.style.setProperty(v, vars[v]);
+  });
+  document.documentElement.style.setProperty('--accent-strong', darkenHex(vars['--accent'], 0.25));
+}
+function applyPreset(preset){
+  applyThemeVars(preset.vars);
+  syncColorInputsFromCurrent();
+  saveAdminOverrides();
+  renderThemePresetGrid();
+}
+function renderThemePresetGrid(){
+  const grid = document.getElementById('theme-preset-grid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  const curAccent = currentVarValue('--accent').toLowerCase();
+  const curFelt = currentVarValue('--felt').toLowerCase();
+  THEME_PRESETS.forEach(preset=>{
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'theme-preset-btn';
+    const isActive = curAccent===preset.vars['--accent'].toLowerCase() && curFelt===preset.vars['--felt'].toLowerCase();
+    if(isActive) btn.classList.add('active');
+    const swatch = document.createElement('span');
+    swatch.className = 'theme-preset-swatch';
+    swatch.style.background = `radial-gradient(circle at 50% 50%, ${preset.vars['--accent']} 40%, ${preset.vars['--felt']} 41%)`;
+    const label = document.createElement('span');
+    label.textContent = preset.name;
+    btn.appendChild(swatch);
+    btn.appendChild(label);
+    btn.addEventListener('click', ()=> applyPreset(preset));
+    grid.appendChild(btn);
+  });
+}
+function saveAdminOverrides(){
+  const overrides = {};
+  PERSISTED_VARS.forEach(v=>{ overrides[v] = currentVarValue(v); });
+  try{ localStorage.setItem('bidding-table-theme-overrides', JSON.stringify(overrides)); }catch(e){}
+}
+function resetAdminOverrides(){
+  PERSISTED_VARS.forEach(v=> document.documentElement.style.removeProperty(v));
+  try{ localStorage.removeItem('bidding-table-theme-overrides'); }catch(e){}
+  syncColorInputsFromCurrent();
+  renderThemePresetGrid();
+}
+
+document.querySelectorAll('.size-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=> startRound(parseInt(btn.dataset.size,10)));
+});
+document.getElementById('free-mode-btn').addEventListener('click', ()=> startRound('free'));
+document.getElementById('type-opening-btn').addEventListener('click', ()=> setPracticeType('opening'));
+document.getElementById('type-responder-btn').addEventListener('click', ()=> setPracticeType('responder'));
+document.getElementById('type-mixed-btn').addEventListener('click', ()=> setPracticeType('mixed'));
+document.getElementById('app-title').addEventListener('click', goHome);
+document.getElementById('home-btn-header').addEventListener('click', goHome);
+document.getElementById('hand-view-btn').addEventListener('click', toggleHandView);
+document.getElementById('settings-link').addEventListener('click', openAdminOverlay);
+document.getElementById('admin-close-btn').addEventListener('click', closeAdminOverlay);
+document.getElementById('admin-save-btn').addEventListener('click', ()=>{ saveAdminOverrides(); closeAdminOverlay(); });
+document.getElementById('admin-reset-btn').addEventListener('click', resetAdminOverrides);
+bindColorInput('color-bg','--bg');
+bindColorInput('color-surface','--surface');
+bindColorInput('color-accent','--accent');
+bindColorInput('color-felt','--felt');
+bindColorInput('color-ink','--ink');
+document.getElementById('scoreboard-save-btn').addEventListener('click', saveToScoreboard);
+document.getElementById('scoreboard-name-input').addEventListener('keydown', (e)=>{ if(e.key==='Enter') saveToScoreboard(); });
+try{
+  const savedName = localStorage.getItem('bidding-table-player-name');
+  if(savedName) document.getElementById('scoreboard-name-input').value = savedName;
+}catch(e){}
+renderRulesLegend();
+render();
+</script>
