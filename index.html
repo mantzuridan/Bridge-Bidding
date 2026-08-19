@@ -915,14 +915,17 @@ function getCurrentRank(points, national, intl){
 /* ---------- opening-bid engine (verified against Toolbox source PDFs) ---------- */
 
 function openBestSuit(lengths, pts){
+  const RANK_HIGH_TO_LOW = ['♠','♥','♦','♣'];
+  const fiveCardSuits = RANK_HIGH_TO_LOW.filter(s => lengths[s]===5);
+  if(fiveCardSuits.length>=2){
+    const top = fiveCardSuits[0];
+    return {bid:'1'+top, explain:`${pts} נק' - שתי חמישיות (${fiveCardSuits.map(suitName).join('/')}), פותחים תמיד בסדרה הגבוהה יותר`};
+  }
   const majors=['♠','♥'];
   const majorLens = majors.map(s=>({s,l:lengths[s]})).filter(x=>x.l>=5).sort((a,b)=> b.l-a.l || (a.s==='♠'?-1:1));
   if(majorLens.length){
     const top=majorLens[0];
     return {bid:'1'+top.s, explain:`${pts} נק', ${top.l} קלפים ב${suitName(top.s)} - חמישייה במייג'ור, פותחים בה`};
-  }
-  if(lengths['♦']===5 && lengths['♣']===5){
-    return {bid:'1♦', explain:`${pts} נק' - שתי חמישיות (♦/♣), פותחים בסדרה הגבוהה יותר`};
   }
   if(lengths['♦']===4 && lengths['♣']===4){
     return {bid:'1♦', explain:`${pts} נק' - שתי רביעיות במיינור, פותחים 1♦`};
