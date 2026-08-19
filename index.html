@@ -921,6 +921,12 @@ function openBestSuit(lengths, pts){
     const top=majorLens[0];
     return {bid:'1'+top.s, explain:`${pts} נק', ${top.l} קלפים ב${suitName(top.s)} - חמישייה במייג'ור, פותחים בה`};
   }
+  if(lengths['♦']===5 && lengths['♣']===5){
+    return {bid:'1♦', explain:`${pts} נק' - שתי חמישיות (♦/♣), פותחים בסדרה הגבוהה יותר`};
+  }
+  if(lengths['♦']===4 && lengths['♣']===4){
+    return {bid:'1♦', explain:`${pts} נק' - שתי רביעיות במיינור, פותחים 1♦`};
+  }
   if(lengths['♦']>lengths['♣']) return {bid:'1♦', explain:`${pts} נק', ${lengths['♦']} קלפים ביהלום - אין חמישייה במייג'ור, פותחים בסדרת המיינור הארוכה יותר`};
   if(lengths['♣']>lengths['♦']) return {bid:'1♣', explain:`${pts} נק', ${lengths['♣']} קלפים בתלתן - אין חמישייה במייג'ור, פותחים בסדרת המיינור הארוכה יותר`};
   return {bid:'1♣', explain:`${pts} נק' - שתי סדרות המיינור שוות באורכן, פותחים 1♣`};
@@ -930,7 +936,10 @@ function openingBid(hand){
   const lengths = suitLengths(hand);
   const pts = hcp(hand);
   const balanced = isBalanced(lengths);
-  if(pts>=23) return {bid:'2♣', explain:`${pts} נק' - יד חזקה מאוד (23+), פתיחה מלאכותית 2♣`};
+  if(pts>=23 || (!balanced && pts>=22)){
+    const reason = pts>=23 ? '23+ נק׳, כל צורה' : '22 נק׳ ביד לא מאוזנת';
+    return {bid:'2♣', explain:`${pts} נק' - יד חזקה מאוד (${reason}), פתיחה מלאכותית 2♣`};
+  }
   if(balanced && pts>=20) return {bid:'2NT', explain:`${pts} נק', יד מאוזנת - פתיחת 2NT (20-22 נק')`};
   if(balanced && pts>=15 && pts<=17) return {bid:'1NT', explain:`${pts} נק', יד מאוזנת - פתיחת 1NT (15-17 נק')`};
   if(pts>=12) return openBestSuit(lengths, pts);
@@ -1309,11 +1318,13 @@ const POINTS_TABLE_HTML = `<table><tr><td>A</td><td>4 נק'</td><td>K</td><td>3 
 
 const OPENING_RULES_HTML = `
   ${POINTS_TABLE_HTML}
-  <div>23+ נק' (כל צורה) ← 2♣ מלאכותי</div>
+  <div>23+ נק' (כל צורה), או 22 נק' ביד לא מאוזנת ← 2♣ מלאכותי</div>
   <div>20-22 נק' מאוזן ← 2NT</div>
   <div>15-17 נק' מאוזן ← 1NT</div>
   <div>חמישייה בסדרת מייג'ור (♠/♥) ← 1 בסדרה הגדולה</div>
-  <div>אחרת, עם 12-19 נק' ← 1 בסדרת המיינור הארוכה יותר (בשוויון: 1♣)</div>
+  <div>שתי חמישיות (לא במייג'ור) ← 1 בסדרה הגבוהה יותר</div>
+  <div>שתי רביעיות במיינור ← 1♦</div>
+  <div>אחרת, עם 12-19 נק' ← 1 בסדרת המיינור הארוכה יותר (בשוויון אחר: 1♣)</div>
   <div>פחות מ-12 נק' ← PASS</div>
   <div style="font-size:0.75rem; opacity:0.85;">* פתיחות חסימה (2 חלש, פתיחות 3) עדיין לא כלולות בתרגול הזה</div>
 `;
