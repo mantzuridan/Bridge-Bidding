@@ -687,7 +687,6 @@ details.legend td{padding:2px 6px; font-variant-numeric:tabular-nums;}
           <thead><tr><td>שם</td><td>נק'</td><td>דרגה</td></tr></thead>
           <tbody id="scoreboard-body"></tbody>
         </table>
-        <script type="application/json" id="scoreboard-data">[{"name":"עידן מחשב","points":53,"rank":"שיעור מודרך"},{"name":"עידן טלפון","points":213,"rank":"תחרות שני אחה\"צ"}]</script>
         <button class="btn wide" id="scoreboard-save-btn" style="margin-top:6px;">עדכן את הניקוד שלי בלוח</button>
       </div>
     </details>
@@ -801,6 +800,7 @@ details.legend td{padding:2px 6px; font-variant-numeric:tabular-nums;}
   </details>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ---------- theme overrides (applied early, before first paint) ---------- */
 const ADMIN_VARS = ['--bg','--surface','--accent','--felt','--ink'];
@@ -1040,18 +1040,12 @@ try{
 }catch(e){}
 function saveStats(){ try{ localStorage.setItem('bidding-table-openings-score', JSON.stringify(stats)); }catch(e){} }
 
-/* ---------- shared score board (self-publishing artifact) ---------- */
-let scoreboardReadOnly = false;
-const scoreboardApiAvailable = !!(window.claude && typeof window.claude.use === 'function');
+/* ---------- shared score board (Supabase) ---------- */
+const SUPABASE_URL = 'https://djciswpmmreqmufgbxtv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_4tNNdTa_s9CcL9-1ie_AhA_Q-QyWfzK';
+const sb = (typeof supabase !== 'undefined') ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
 let SCOREBOARD = [];
-try{
-  const dataEl = document.getElementById('scoreboard-data');
-  if(dataEl){
-    const parsed = JSON.parse(dataEl.textContent);
-    if(Array.isArray(parsed)) SCOREBOARD = parsed;
-  }
-}catch(e){}
 
 function renderScoreboardTable(){
   const tbody = document.getElementById('scoreboard-body');
@@ -1068,7 +1062,7 @@ function renderScoreboardTable(){
     ptsCell.textContent = String(entry.points);
     const rankCell = document.createElement('td');
     rankCell.className = 'sb-rank';
-    rankCell.textContent = entry.rank;
+    rankCell.textContent = entry.rank_name;
     row.appendChild(nameCell);
     row.appendChild(ptsCell);
     row.appendChild(rankCell);
@@ -1081,12 +1075,19 @@ function updateScoreboardNote(msgOverride){
   if(!note) return;
   if(msgOverride){
     note.textContent = msgOverride;
-  } else if(scoreboardReadOnly){
-    note.textContent = 'הניקוד שלך נשמר במכשיר הזה, אבל אין לך הרשאת עריכה לארטיפקט כדי לשתף אותו לאחרים.';
-  } else if(!scoreboardApiAvailable){
-    note.textContent = 'הלוח מוצג באופן מקומי בלבד בתצוגה הזו (שיתוף לא זמין כאן).';
+  } else if(!sb){
+    note.textContent = 'החיבור ללוח המשותף לא זמין כרגע.';
   } else {
-    note.textContent = 'משותף לכל מי שיש לו גישת עריכה לארטיפקט הזה.';
+    note.textContent = 'משותף בזמן אמת עם כל מי שיש לו את הקישור.';
+  }
+}
+
+async function loadScoreboard(){
+  if(!sb) return;
+  const {data, error} = await sb.from('scores').select('name, points, rank_name').order('points', {ascending:false});
+  if(!error && data){
+    SCOREBOARD = data;
+    renderScoreboardTable();
   }
 }
 
@@ -1104,42 +1105,23 @@ async function saveToScoreboard(){
   try{ localStorage.setItem('bidding-table-player-name', name); }catch(e){}
 
   const rankName = getCurrentRank(stats.points, stats.nationalPoints, stats.intlPoints).name;
-  const existing = SCOREBOARD.find(e=> e.name===name);
-  if(existing){
-    existing.points = stats.points;
-    existing.rank = rankName;
-  } else {
-    SCOREBOARD.push({name, points: stats.points, rank: rankName});
-  }
-  renderScoreboardTable();
 
-  if(!scoreboardApiAvailable){
-    updateScoreboardNote();
+  if(!sb){
+    updateScoreboardNote('החיבור ללוח המשותף לא זמין כרגע.');
     return;
   }
-  updateScoreboardNote('שומר ומשתף...');
-  try{
-    const api = await window.claude.use('artifact');
-    if(!api){ updateScoreboardNote(); return; }
-    const res = await fetch(location.href, {cache:'no-store'});
-    if(!res.ok) throw new Error('fetch failed');
-    let html = await res.text();
-    const newBlock = '<script type="application/json" id="scoreboard-data">' + JSON.stringify(SCOREBOARD) + '<\/script>';
-    const pattern = /<script type="application\/json" id="scoreboard-data">[\s\S]*?<\/script>/;
-    if(!pattern.test(html)) throw new Error('scoreboard block not found');
-    html = html.replace(pattern, newBlock);
-    await api.publish(html);
-    updateScoreboardNote('✅ עודכן ושותף בלוח!');
-  }catch(err){
-    if(err && (err.code==='not_writer' || err.code==='not_granted')){
-      scoreboardReadOnly = true;
-      updateScoreboardNote();
-    } else if(err && err.code==='conflict'){
-      updateScoreboardNote('מישהו אחר עדכן בו-זמנית - הניקוד שלך נשמר, נסה/י שוב בעוד רגע.');
-    } else {
-      updateScoreboardNote('הניקוד נשמר במכשיר הזה, אבל השיתוף לא הצליח כרגע. נסה/י שוב.');
-    }
-  }
+  updateScoreboardNote('שומר...');
+  const {error} = await sb.from('scores').upsert(
+    {name, points: stats.points, rank_name: rankName},
+    {onConflict: 'name'}
+  );
+  updateScoreboardNote(error ? 'השמירה נכשלה, נסה/י שוב.' : '✅ עודכן בלוח!');
+}
+
+if(sb){
+  sb.channel('scores-changes')
+    .on('postgres_changes', {event:'*', schema:'public', table:'scores'}, ()=> loadScoreboard())
+    .subscribe();
 }
 
 let round = null;
@@ -1723,4 +1705,5 @@ try{
 }catch(e){}
 renderRulesLegend();
 render();
+loadScoreboard();
 </script>
