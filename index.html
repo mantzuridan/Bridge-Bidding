@@ -931,6 +931,17 @@ function getCurrentRank(points, national, intl){
 
 function openBestSuit(lengths, pts){
   const RANK_HIGH_TO_LOW = ['♠','♥','♦','♣'];
+
+  const quartets = RANK_HIGH_TO_LOW.filter(s => lengths[s]===4);
+  const singleton = RANK_HIGH_TO_LOW.find(s => lengths[s]===1);
+  if(quartets.length===3 && singleton){
+    if(singleton==='♠'){
+      return {bid:'1♦', explain:`${pts} נק' - יד 4=4=4=1 עם סינגלטון בספייד, פותחים ביהלום כדי להימנע מרברס בהמשך`};
+    }
+    const lowestQuartet = RANK_HIGH_TO_LOW.slice().reverse().find(s => lengths[s]===4);
+    return {bid:'1'+lowestQuartet, explain:`${pts} נק' - יד 4=4=4=1, פותחים ברביעייה הנמוכה ביותר`};
+  }
+
   const fiveCardSuits = RANK_HIGH_TO_LOW.filter(s => lengths[s]===5);
   if(fiveCardSuits.length>=2){
     const top = fiveCardSuits[0];
@@ -1034,10 +1045,16 @@ function respondToSuit(lengths, pts, suit){
     suit==='♣' ? ['♥','♠','♦'] :
     suit==='♦' ? ['♥','♠'] :
     suit==='♥' ? ['♠'] : [];
-  for(const s of oneLevelOrder){
-    if(lengths[s]>=4){
-      return {bid:'1'+s, explain:`${pts} נק', ${lengths[s]} קלפים ב${suitName(s)} - סדרה חדשה בדרג 1 (6+ נק')`};
-    }
+  const oneLevelCandidates = oneLevelOrder.filter(s => lengths[s]>=4);
+  const oneLevelFiveCards = oneLevelCandidates.filter(s => lengths[s]===5);
+  if(oneLevelFiveCards.length>=2){
+    const RANK_HIGH_TO_LOW = ['♠','♥','♦','♣'];
+    const top = RANK_HIGH_TO_LOW.find(s => oneLevelFiveCards.includes(s));
+    return {bid:'1'+top, explain:`${pts} נק' - שתי חמישיות (${oneLevelFiveCards.map(suitName).join('/')}), מכריזים תמיד בגבוהה מביניהן`};
+  }
+  if(oneLevelCandidates.length){
+    const s = oneLevelCandidates[0];
+    return {bid:'1'+s, explain:`${pts} נק', ${lengths[s]} קלפים ב${suitName(s)} - סדרה חדשה בדרג 1 (6+ נק')`};
   }
 
   if(pts>=11){
@@ -1101,10 +1118,16 @@ function openerRebid(hand, openBid, respBid){
   }
 
   if(candidates.length>1) return null;
-  if(pts<12 || pts>17) return null;
 
   const secondSuit = candidates[0];
+  const cheapLevel = bidRank('1'+secondSuit) > bidRank(respBid) ? 1 : 2;
+
+  if(cheapLevel===1){
+    return {bid:'1'+secondSuit, explain:`${pts} נק' - יד דו-סדרתית (${lengths[openedSuit]} ב${suitName(openedSuit)}, ${lengths[secondSuit]} ב${suitName(secondSuit)}), מציגים את הסדרה השנייה בגובה 1 (זול, בלי בעיה)`};
+  }
+
   if(STRAIN_ORDER.indexOf(secondSuit) > STRAIN_ORDER.indexOf(openedSuit)) return null;
+  if(pts<12 || pts>17) return null;
 
   return {bid:'2'+secondSuit, explain:`${pts} נק' - יד דו-סדרתית (${lengths[openedSuit]} ב${suitName(openedSuit)}, ${lengths[secondSuit]} ב${suitName(secondSuit)}), מציגים את הסדרה השנייה בגובה 2`};
 }
@@ -1418,6 +1441,7 @@ const OPENING_RULES_HTML = `
   <div>חמישייה בסדרת מייג'ור (♠/♥) ← 1 בסדרה הגדולה</div>
   <div>שתי חמישיות (לא במייג'ור) ← 1 בסדרה הגבוהה יותר</div>
   <div>שתי רביעיות במיינור ← 1♦</div>
+  <div>יד 4=4=4=1: פותחים ברביעייה הנמוכה ביותר - חוץ מסינגלטון בספייד, אז 1♦</div>
   <div>אחרת, עם 12-19 נק' ← 1 בסדרת המיינור הארוכה יותר (בשוויון אחר: 1♣)</div>
   <div>פחות מ-12 נק' ← PASS</div>
   <div style="font-size:0.75rem; opacity:0.85;">* פתיחות חסימה (2 חלש, פתיחות 3) עדיין לא כלולות בתרגול הזה</div>
@@ -1427,7 +1451,7 @@ const RESPONDER_RULES_HTML = `
   ${POINTS_TABLE_HTML}
   <div>תמיכה בסדרת הפותח: 3+ קלפים במייג'ור, 5+ במיינור</div>
   <div>עם תמיכה: 6-10 נק' ← הגבהה פשוטה · 11-12 ← הגבהה מזמינה · 13+ ← משחק (מייג'ור) / 3NT (מיינור)</div>
-  <div>בלי תמיכה: סדרה חדשה בדרג 1 (6+ נק', 4+ קלפים) קודמת לכל</div>
+  <div>בלי תמיכה: סדרה חדשה בדרג 1 (6+ נק', 4+ קלפים) קודמת לכל, ועם שתי חמישיות בדרג 1 מכריזים את הגבוהה</div>
   <div>בלי תמיכה, בלי דרג 1: סדרה חדשה בדרג 2 דורשת 11+ נק' ו-5+ קלפים ("רשת ביטחון")</div>
   <div>אחרת: 1NT = 6-9 נק' · 2NT = 10-12 נק' · 3NT = 13+ נק'</div>
   <div>חמישייה (או יותר) במייג'ור ← טרנספר (2♦/2♥ אחרי 1NT, 3♦/3♥ אחרי 2NT) - קודם לכל דבר אחר, הפותח משלים אוטומטית</div>
@@ -1441,7 +1465,7 @@ const REBID_RULES_HTML = `
   <div>אחרי פתיחה בגובה 1 ותשובת השותף בגובה 1 (כולל 1NT), ההכרזה החוזרת שלך מתארת את היד במדויק:</div>
   <div><b>יד מאוזנת:</b> 12-14 נק' ← NT הזול ביותר (1NT) · 18-19 נק' ← קפיצה ל-NT (2NT)</div>
   <div><b>יד חד-סדרתית:</b> 12-14 ← חוזרים על הסדרה בזול · 15-17 ← חוזרים על הסדרה בקפיצה · 18-19 (מייג'ור) ← קפיצה כפולה למשחק מלא · 18-19 (מיינור) ← 3NT בלית ברירה</div>
-  <div><b>יד דו-סדרתית:</b> סדרה שנייה (4+ קלפים) הנמוכה מהראשונה ← מכריזים אותה בגובה 2 (12-17 נק')</div>
+  <div><b>יד דו-סדרתית:</b> סדרה שנייה (4+ קלפים) - אם אפשר עדיין בגובה 1, מכריזים אותה שם בלי הגבלת נק' · אם רק בגובה 2 והיא נמוכה מהראשונה, דורש 12-17 נק'</div>
   <div style="font-size:0.75rem; opacity:0.85;">* מקרה שבו הסדרה השנייה גבוהה מהראשונה (רברס, 17+ נק') עדיין לא כלול בתרגול הזה</div>
 `;
 
